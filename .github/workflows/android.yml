@@ -3,6 +3,8 @@ on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,3 +33,10 @@ jobs:
         with:
           name: SnesBuild-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Publicar o APK em Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk SnesBuild.apk
+          gh release delete apk-atual --yes --cleanup-tag || true
+          gh release create apk-atual SnesBuild.apk --title "SNES Build (APK)" --notes "APK mais recente gerado automaticamente. Baixe SnesBuild.apk e instale."
