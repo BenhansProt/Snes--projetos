@@ -120,7 +120,7 @@ footer{color:var(--mut);font-size:12px}
 
 <div class="work">
   <aside class="panel tree" aria-label="Pastas e arquivos do projeto">
-    <div class="treehead"><span>PROJETO</span><button class="mini danger" id="closeproj" type="button" title="Remove todos os arquivos e pastas do projeto">Fechar projeto</button></div>
+    <div class="treehead"><span>PROJETO</span></div>
     <div id="tree" role="tree"></div>
   </aside>
   <section class="panel edpane" aria-label="Editor">
@@ -487,16 +487,6 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
  cm.setSelection({line:ln,ch:0},{line:ln,ch:cm.getLine(ln).length});cm.scrollIntoView({line:ln,ch:0},120);cm.focus();
  $("#cmhost").scrollIntoView({block:"nearest",behavior:"smooth"})}
 
-/* ---- fechar o projeto inteiro ---- */
-let closeProjArm=0;
-$("#closeproj").onclick=function(){
- if(!S.files.size)return;
- if(!closeProjArm){closeProjArm=1;this.textContent="Confirmar: apagar tudo";setTimeout(()=>{closeProjArm=0;this.textContent="Fechar projeto"},3500);return}
- closeProjArm=0;this.textContent="Fechar projeto";
- S.files=new Map();docs.clear();S.cur="";S.main="";S.selDir="";S.selKind="file";S.open=new Set();
- for(const k of Object.keys(errLines))delete errLines[k];errApplied.clear();shown=null;dirty=false;
- cm.swapDoc(CodeMirror.Doc("","asm65"));closeFind&&F.on&&closeFind();
- showCur();renderTree();save();log("Projeto fechado: todos os arquivos foram removidos.","m")};
 /* ---------- download ---------- */
 const BR=()=>window.SnesBridge||null;
 function b64(d){let s="";for(let i=0;i<d.length;i+=0x8000)s+=String.fromCharCode.apply(null,d.subarray(i,i+0x8000));return btoa(s)}
@@ -530,7 +520,11 @@ $("#file").onchange=async e=>{flush();let add=0;
     for(const k of names){putFile(normName(k.slice(strip.length)),m.get(k));add++}}catch(er){log("Erro no zip: "+er.message,"e")}}
   else{putFile(normName(f.name),new Uint8Array(buf));add++}}
  e.target.value="";afterImport(add,"arquivo(s) importado(s).")};
-$("#impdir").onclick=()=>$("#dirinput").click();
+/* No app Android o WebView não escolhe pastas: a ponte nativa abre o seletor de pastas e devolve os arquivos um a um */
+let nat=null;
+window.pastaNativa=(p,b64)=>{if(!nat)return;const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const rel=normName(p);putFile(rel,u);nat.add++;nat.tops.add(rel.split("/")[0]);nat.b.textContent="Importando… "+nat.add};
+window.pastaNativaFim=n=>{const s=nat;if(!s)return;nat=null;s.b.disabled=false;s.b.textContent="Importar pasta";if(n<0){return}s.tops.forEach(t=>S.open.add(t));afterImport(s.add,"arquivo(s) de dados importado(s) das pastas: "+[...s.tops].join(", ")+".")};
+$("#impdir").onclick=()=>{if(BR()&&BR().escolherPasta){flush();const b=$("#impdir");b.disabled=true;b.textContent="Importando…";nat={add:0,tops:new Set(),b};BR().escolherPasta()}else $("#dirinput").click()};
 $("#dirinput").onchange=async e=>{flush();const fs=[...e.target.files];if(!fs.length)return;const b=$("#impdir");b.disabled=true;b.textContent="Importando…";let add=0;const tops=new Set();
  try{for(const f of fs){const rel=normName(f.webkitRelativePath||f.name);if(rel.split("/").some(s=>s.startsWith(".")))continue;
   putFile(rel,new Uint8Array(await f.arrayBuffer()));add++;if(rel.includes("/"))tops.add(rel.split("/")[0])}}

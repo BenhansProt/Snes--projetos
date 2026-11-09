@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.database.Cursor;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
@@ -21,11 +23,14 @@ import androidx.core.content.FileProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 
 public class MainActivity extends Activity {
 
     private static final int REQ_ARQUIVOS = 1;
+    private static final int REQ_PASTA = 2;
     private WebView web;
     private ValueCallback<Uri[]> seletor;
 
@@ -60,8 +65,66 @@ public class MainActivity extends Activity {
         web.loadUrl("file:///android_asset/index.html");
     }
 
+    private void js(final String codigo) {
+        runOnUiThread(() -> web.evaluateJavascript(codigo, null));
+    }
+
+    /** Percorre a pasta escolhida e manda cada arquivo para a página (caminho relativo + base64). */
+    private void lerPasta(final Uri arvore) {
+        new Thread(() -> {
+            int n = 0;
+            try {
+                String raiz = DocumentsContract.getTreeDocumentId(arvore);
+                String nomeRaiz = raiz.contains(":") ? raiz.substring(raiz.lastIndexOf(':') + 1) : raiz;
+                if (nomeRaiz.contains("/")) nomeRaiz = nomeRaiz.substring(nomeRaiz.lastIndexOf('/') + 1);
+                if (nomeRaiz.isEmpty()) nomeRaiz = "DADOS";
+                n = percorrer(arvore, raiz, nomeRaiz);
+            } catch (Exception e) {
+                aviso("Erro ao ler a pasta: " + e);
+            }
+            js("window.pastaNativaFim&&window.pastaNativaFim(" + n + ")");
+        }).start();
+    }
+
+    private int percorrer(Uri arvore, String docId, String caminho) throws Exception {
+        int n = 0;
+        Uri filhos = DocumentsContract.buildChildDocumentsUriUsingTree(arvore, docId);
+        java.util.ArrayList<String[]> itens = new java.util.ArrayList<>();
+        try (Cursor c = getContentResolver().query(filhos, new String[]{
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_MIME_TYPE}, null, null, null)) {
+            while (c != null && c.moveToNext()) itens.add(new String[]{c.getString(0), c.getString(1), c.getString(2)});
+        }
+        for (String[] it : itens) {
+            String nome = it[1];
+            if (nome == null || nome.startsWith(".")) continue;
+            if (DocumentsContract.Document.MIME_TYPE_DIR.equals(it[2])) {
+                n += percorrer(arvore, it[0], caminho + "/" + nome);
+            } else {
+                Uri u = DocumentsContract.buildDocumentUriUsingTree(arvore, it[0]);
+                try (InputStream in = getContentResolver().openInputStream(u)) {
+                    ByteArrayOutputStream o = new ByteArrayOutputStream();
+                    byte[] b = new byte[65536];
+                    int k;
+                    while ((k = in.read(b)) > 0) o.write(b, 0, k);
+                    String b64 = Base64.encodeToString(o.toByteArray(), Base64.NO_WRAP);
+                    String p = (caminho + "/" + nome).replace("\\", "\\\\").replace("'", "\\'");
+                    js("window.pastaNativa&&window.pastaNativa('" + p + "','" + b64 + "')");
+                    n++;
+                }
+            }
+        }
+        return n;
+    }
+
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
+        if (req == REQ_PASTA) {
+            if (res == RESULT_OK && data != null && data.getData() != null) lerPasta(data.getData());
+            else js("window.pastaNativaFim&&window.pastaNativaFim(-1)");
+            return;
+        }
         if (req == REQ_ARQUIVOS && seletor != null) {
             seletor.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(res, data));
             seletor = null;
@@ -122,6 +185,19 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 return "erro: " + e;
             }
+        }
+
+        /** Abre o seletor de PASTA do Android (o WebView não sabe escolher pastas sozinho). */
+        @JavascriptInterface
+        public void escolherPasta() {
+            runOnUiThread(() -> {
+                try {
+                    startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), REQ_PASTA);
+                } catch (Exception e) {
+                    aviso("Este aparelho não tem seletor de pastas: " + e);
+                    js("window.pastaNativaFim&&window.pastaNativaFim(-1)");
+                }
+            });
         }
 
         /** Salva o arquivo em Downloads/SNES. */
