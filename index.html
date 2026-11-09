@@ -63,8 +63,8 @@ button,select,input,textarea{font:inherit;color:inherit}
 .CodeMirror-gutters{background:var(--code);border-right:1px solid var(--line)}
 .CodeMirror-linenumber{color:var(--mut);padding:0 8px 0 4px}
 .CodeMirror-cursor{border-left:2px solid var(--fg)}
-.CodeMirror-selected{background:var(--sel)}
-.CodeMirror-focused .CodeMirror-selected{background:var(--sel2)}
+.CodeMirror-selected{background:rgba(66,133,244,.32)}
+.CodeMirror-focused .CodeMirror-selected{background:rgba(66,133,244,.38)}
 .cm-s-snes .cm-comment{color:var(--tk-com);font-style:italic}
 .cm-s-snes .cm-string{color:var(--tk-str)}
 .cm-s-snes .cm-number{color:var(--tk-num)}
@@ -97,6 +97,13 @@ button,select,input,textarea{font:inherit;color:inherit}
 .taw.mono .tata{color:var(--fg)}
 .taw.mono .tapre{visibility:hidden}
 .taw.mono .tata::selection{background:rgba(66,133,244,.38);color:inherit}
+
+/* ---- seleção por toque longo (celular) ---- */
+.tsh{position:fixed;z-index:9998;width:22px;height:22px;background:#4285f4;touch-action:none;display:none;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.tsh.l{border-radius:50% 0 50% 50%}.tsh.r{border-radius:0 50% 50% 50%}
+.tsm{position:fixed;z-index:9999;display:none;background:#2b2833;color:#fff;border-radius:10px;padding:4px;box-shadow:0 2px 10px rgba(0,0,0,.45);gap:2px;font:14px system-ui,sans-serif}
+.tsm button{background:transparent;border:0;color:#fff;padding:9px 12px;border-radius:8px;font:inherit}
+.tsm button:active{background:rgba(255,255,255,.18)}
 
 .bin{padding:26px 14px;color:var(--mut);font:13px var(--mono)}
 #log{margin:0;padding:10px;max-height:38vh;min-height:90px;overflow:auto;font:12.5px/1.5 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--code);border-radius:0 0 10px 10px}
@@ -291,7 +298,7 @@ async function save(){try{const db=await idb();const o={files:[...S.files],cur:S
 async function restore(){try{const db=await idb();return await new Promise(ok=>{const r=db.transaction("k").objectStore("k").get("proj");r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}catch(e){return null}}
 let saveT=0;const saveSoon=()=>{clearTimeout(saveT);saveT=setTimeout(save,400)};
 /* ---------- editor nativo (celular): caixa de texto de verdade, com seleção por toque longo e alças ---------- */
-const IS_TA=!!window.SnesBridge||(window.matchMedia&&matchMedia("(pointer:coarse)").matches);
+const IS_TA=false;
 class TADoc{constructor(t){this.text=t;this.a=0;this.h=0;this.sx=0;this.sy=0;this.eb=new Set();this.eg=new Set()}
  lineCount(){return this.text.split("\n").length}
  addLineClass(l,w,c){(w==="gutter"?this.eg:this.eb).add(l);this.rr&&this.rr();return {l,w}}
@@ -582,6 +589,57 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
  cm.setSelection({line:ln,ch:0},{line:ln,ch:cm.getLine(ln).length});cm.scrollIntoView({line:ln,ch:0},120);cm.focus();
  $("#cmhost").scrollIntoView({block:"nearest",behavior:"smooth"})}
 
+
+/* ---------- seleção por toque longo com alças azuis (celular) ---------- */
+(function(){
+ if(IS_TA||!("ontouchstart" in window))return;
+ const w=cm.getWrapperElement();
+ const hL=document.createElement("div"),hR=document.createElement("div"),menu=document.createElement("div");
+ hL.className="tsh l";hR.className="tsh r";menu.className="tsm";document.body.append(hL,hR,menu);
+ let timer=0,sx=0,sy=0,lp=false,drag=null,mode="none";
+ const hide=()=>{hL.style.display=hR.style.display=menu.style.display="none";mode="none"};
+ const B=()=>window.SnesBridge;
+ function copyText(t){try{if(B()&&B().copiar){B().copiar(t);return}}catch(e){}
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return}}catch(e){}
+  const x=document.createElement("textarea");x.value=t;x.style.cssText="position:fixed;opacity:0";document.body.append(x);x.select();try{document.execCommand("copy")}catch(e){}x.remove();cm.focus()}
+ async function pasteText(){try{if(B()&&B().colar)return String(B().colar()||"")}catch(e){}
+  try{if(navigator.clipboard&&navigator.clipboard.readText)return await navigator.clipboard.readText()}catch(e){}return ""}
+ const acts={Copiar(){copyText(cm.getSelection())},Recortar(){copyText(cm.getSelection());cm.replaceSelection("")},Apagar(){cm.replaceSelection("")},
+  async Colar(){const t=await pasteText();if(t)cm.replaceSelection(t,"end")},Tudo(){cm.execCommand("selectAll")}};
+ function buildMenu(){menu.textContent="";const names=cm.somethingSelected()?["Copiar","Recortar","Colar","Apagar","Tudo"]:["Colar","Tudo"];
+  names.forEach(n=>{const b=document.createElement("button");b.type="button";b.textContent=n;
+   b.addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
+   b.addEventListener("touchend",async e=>{e.preventDefault();await acts[n]();if(n==="Copiar"){cm.setCursor(cm.getCursor("to"));hide()}else if(n==="Colar"||n==="Recortar"||n==="Apagar")hide();else place()},{passive:false});
+   menu.append(b)});menu.style.display="flex"}
+ function place(){
+  if(mode==="none")return;const sel=cm.somethingSelected();
+  const a=cm.cursorCoords(cm.getCursor("from"),"window"),b=cm.cursorCoords(cm.getCursor("to"),"window"),vh=window.innerHeight,vw=window.innerWidth;
+  const hit=(el,x,y)=>{el.style.left=Math.max(0,Math.min(vw-22,x))+"px";el.style.top=y+"px"};
+  if(sel){hL.style.display=hR.style.display="block";hit(hL,a.left-22,a.bottom);hit(hR,b.left,b.bottom)}else{hL.style.display=hR.style.display="none"}
+  const mw=menu.offsetWidth||200,mh=menu.offsetHeight||44;let mx=(a.left+(sel?b.left:a.left))/2-mw/2;mx=Math.max(6,Math.min(vw-mw-6,mx));
+  let my=a.top-mh-8;if(my<6)my=b.bottom+34;if(my>vh-mh-6)my=vh-mh-6;menu.style.left=mx+"px";menu.style.top=my+"px"}
+ function show(){mode="sel";buildMenu();place()}
+ w.addEventListener("touchstart",e=>{if(e.touches.length!==1){clearTimeout(timer);return}const t=e.touches[0];sx=t.clientX;sy=t.clientY;lp=false;clearTimeout(timer);
+  timer=setTimeout(()=>{const pos=cm.coordsChar({left:sx,top:sy},"window");const wd=cm.findWordAt(pos);const txt=cm.getRange(wd.anchor,wd.head);
+   lp=true;cm.focus();if(/\S/.test(txt))cm.setSelection(wd.anchor,wd.head);else cm.setCursor(pos);show();try{navigator.vibrate&&navigator.vibrate(15)}catch(er){}},450)},{passive:true});
+ w.addEventListener("touchmove",e=>{const t=e.touches[0];if(Math.abs(t.clientX-sx)>10||Math.abs(t.clientY-sy)>10)clearTimeout(timer);if(lp)e.preventDefault()},{passive:false});
+ w.addEventListener("touchend",e=>{clearTimeout(timer);if(lp){e.preventDefault();lp=false;return}if(mode!=="none"&&!cm.somethingSelected())hide()},{passive:false});
+ w.addEventListener("touchcancel",()=>clearTimeout(timer),{passive:true});
+ w.addEventListener("contextmenu",e=>e.preventDefault());
+ /* arrastar as alças */
+ function startDrag(which){return e=>{e.preventDefault();e.stopPropagation();drag=which;menu.style.display="none"}}
+ hL.addEventListener("touchstart",startDrag("L"),{passive:false});hR.addEventListener("touchstart",startDrag("R"),{passive:false});
+ document.addEventListener("touchmove",e=>{if(!drag)return;e.preventDefault();const t=e.touches[0];
+  const pos=cm.coordsChar({left:t.clientX+(drag==="L"?10:-10),top:t.clientY-26},"window");
+  const f=cm.getCursor("from"),to=cm.getCursor("to");const cmp=(p,q)=>p.line-q.line||p.ch-q.ch;
+  if(drag==="L"){if(cmp(pos,to)>=0){cm.setSelection(to,to)}else cm.setSelection(pos,to)}else{if(cmp(pos,f)<=0){cm.setSelection(f,f)}else cm.setSelection(f,pos)}
+  place()},{passive:false});
+ document.addEventListener("touchend",()=>{if(drag){drag=null;if(mode!=="none"){buildMenu();place()}}},{passive:true});
+ cm.on("cursorActivity",()=>{if(mode==="sel"&&!drag){if(!cm.somethingSelected()&&menu.children.length>2)hide();else place()}});
+ cm.on("scroll",place);cm.on("blur",()=>{if(!drag)setTimeout(()=>{if(!cm.hasFocus()&&!drag)hide()},250)});
+ window.addEventListener("scroll",place,{passive:true});window.addEventListener("resize",place);
+ let raf=0;(function loop(){if(mode!=="none")place();raf=requestAnimationFrame(loop)})();
+})();
 /* ---------- download ---------- */
 const BR=()=>window.SnesBridge||null;
 function b64(d){let s="";for(let i=0;i<d.length;i+=0x8000)s+=String.fromCharCode.apply(null,d.subarray(i,i+0x8000));return btoa(s)}

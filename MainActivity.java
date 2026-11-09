@@ -2,7 +2,10 @@ package br.snesbuild;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -191,6 +194,25 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 return "erro: " + e;
             }
+        }
+
+        /** Área de transferência do Android (o WebView em file:// não tem acesso a ela). */
+        @JavascriptInterface
+        public void copiar(String texto) {
+            try {
+                ClipboardManager c = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                c.setPrimaryClip(ClipData.newPlainText("codigo", texto));
+            } catch (Exception e) { aviso("Não consegui copiar: " + e); }
+        }
+
+        @JavascriptInterface
+        public String colar() {
+            try {
+                ClipboardManager c = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (c == null || !c.hasPrimaryClip() || c.getPrimaryClip().getItemCount() == 0) return "";
+                CharSequence s = c.getPrimaryClip().getItemAt(0).coerceToText(MainActivity.this);
+                return s == null ? "" : s.toString();
+            } catch (Exception e) { return ""; }
         }
 
         /** Abre o seletor de PASTA do Android (o WebView não sabe escolher pastas sozinho). */
