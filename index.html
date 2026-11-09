@@ -94,6 +94,10 @@ button,select,input,textarea{font:inherit;color:inherit}
 .taw{-webkit-text-size-adjust:100%;text-size-adjust:100%;font-variant-ligatures:none}
 .tata{-webkit-user-select:text;user-select:text;-webkit-tap-highlight-color:transparent}
 
+.taw.mono .tata{color:var(--fg)}
+.taw.mono .tapre{visibility:hidden}
+.taw.mono .tata::selection{background:rgba(66,133,244,.38);color:inherit}
+
 .bin{padding:26px 14px;color:var(--mut);font:13px var(--mono)}
 #log{margin:0;padding:10px;max-height:38vh;min-height:90px;overflow:auto;font:12.5px/1.5 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--code);border-radius:0 0 10px 10px}
 #log .e{color:var(--err)}#log .w{color:var(--warn)}#log .o{color:var(--ok)}#log .m{color:var(--mut)}
@@ -295,7 +299,8 @@ class TADoc{constructor(t){this.text=t;this.a=0;this.h=0;this.sx=0;this.sy=0;thi
 function TAEditor(host){
  const root=document.createElement("div");root.className="taw cm-s-snes";
  root.innerHTML='<div class="tain"><div class="tag" aria-hidden="true"></div><div class="tabody"><div class="tapre" aria-hidden="true"></div><textarea class="tata" wrap="off" spellcheck="false" autocapitalize="none" autocorrect="off" autocomplete="off" data-gramm="false" aria-label="Editor de código"></textarea></div></div>';
- host.append(root);
+ host.append(root);let colors=false;try{colors=localStorage.getItem("ta_cores")==="1"}catch(e){}
+ root.classList.toggle("mono",!colors);
  const ta=root.querySelector("textarea"),pre=root.querySelector(".tapre"),gut=root.querySelector(".tag");
  const mode=CodeMirror.getMode({},"asm65");
  let doc=new TADoc(""),ov=null,marks=[],hs={change:[]},rT=0,cw=7.8,lh=20;
@@ -344,7 +349,7 @@ function TAEditor(host){
   findWordAt(p){const L=api.getLine(p.line);let s=p.ch,e=p.ch;const w=/[\w@.$]/;while(s>0&&w.test(L[s-1]))s--;while(e<L.length&&w.test(L[e]))e++;return {anchor:{line:p.line,ch:s},head:{line:p.line,ch:e}}},
   addOverlay(o){ov=o;later()},removeOverlay(){ov=null;later()},
   markText(a,b,o){if(o&&o.collapsed)return {clear(){},find:()=>null,on(){}};const m={a:idx(a),b:idx(b),c:o&&o.className||""};marks.push(m);later();return {clear(){marks=marks.filter(x=>x!==m);later()},find:()=>({from:pos(m.a),to:pos(m.b)}),on(){}}},
-  getAllMarks:()=>[],setGutterMarker(){},clearGutter(){},
+  getAllMarks:()=>[],setColors(v){colors=v;root.classList.toggle("mono",!v);try{localStorage.setItem("ta_cores",v?"1":"0")}catch(e){}},hasColors:()=>colors,setGutterMarker(){},clearGutter(){},
   swapDoc(d){const old=doc;old.text=ta.value;old.a=ta.selectionStart;old.h=ta.selectionEnd;old.sx=root.scrollLeft;old.sy=root.scrollTop;doc=d;d.rr=later;ta.value=d.text;marks=[];try{ta.setSelectionRange(d.a,d.h)}catch(e){}render();root.scrollTop=d.sy;root.scrollLeft=d.sx;return old}};
  try{new ResizeObserver(()=>{measure()}).observe(root)}catch(e){}
  measure();doc.rr=later;render();return api}
@@ -503,7 +508,10 @@ cm.on("gutterClick",(c,l,g)=>{if(g==="fold")toggleFold(l)});
 function foldAll(){FR=computeFolds();let last=-1;cm.operation(()=>{[...FR.keys()].sort((a,b)=>a-b).forEach(l=>{if(l<=last)return;doFold(l,FR.get(l));last=FR.get(l)})});refreshFoldGutter()}
 function unfoldAll(){cm.operation(()=>foldMarks().forEach(m=>m.clear()));refreshFoldGutter()}
 function unfoldAt(l){foldMarks().forEach(m=>{const r=m.find();if(r&&r.from.line<l&&r.to.line>=l)m.clear()})}
-if(IS_TA){$("#foldall").hidden=true;$("#unfoldall").hidden=true}
+if(IS_TA){$("#foldall").hidden=true;$("#unfoldall").hidden=true;
+ const cb=$("#foldall").cloneNode(false);cb.id="colbtn";cb.hidden=false;cb.type="button";$("#foldall").after(cb);
+ const upd=()=>{cb.textContent=cm.hasColors()?"Cores: ligadas":"Cores: desligadas";cb.title="Ligar/desligar as cores do código (desligado = cursor sempre alinhado)"};upd();
+ cb.onclick=()=>{cm.setColors(!cm.hasColors());upd()}}
 $("#foldall").onclick=foldAll;$("#unfoldall").onclick=unfoldAll;
 
 const F={on:false,case:false,word:false,list:[],idx:-1,over:null,mark:null};
