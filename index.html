@@ -356,10 +356,10 @@ const show=(id,v)=>$(id).hidden=!v;
 const selTarget=()=>S.selKind==="dir"&&S.selDir?{k:"dir",p:S.selDir}:{k:"file",p:S.cur};
 function movePath(from,to,isDir){
  const mv=k=>{if(!isDir)return k===from?to:k;return k===from||k.startsWith(from+"/")?to+k.slice(from.length):k};
- const nf=new Map();for(const [k,v] of S.files)nf.set(mv(k),v);
+ const oldMain=split(S.o.main);const nf=new Map();for(const [k,v] of S.files)nf.set(mv(k),v);
  const nd=new Map();for(const [k,v] of docs)nd.set(mv(k),v);docs.clear();nd.forEach((v,k)=>docs.set(k,v));
  S.files=nf;S.cur=mv(S.cur);S.main=mv(S.main);if(shown)shown=mv(shown);
- S.o.main=split(S.o.main).map(mv).join(" ");S.o.cfg=mv(S.o.cfg);
+ S.o.main=oldMain.map(mv).map(x=>/\s/.test(x)?'"'+x+'"':x).join(" ");S.o.cfg=mv(S.o.cfg);
  S.open=new Set([...S.open].map(mv));if(S.selDir)S.selDir=mv(S.selDir);
  for(const k of Object.keys(errLines)){if(mv(k)!==k){errLines[mv(k)]=errLines[k];delete errLines[k]}}}
 $("#addf").onclick=()=>{flush();const t=selTarget();const pre=t.k==="dir"?t.p:dirOf(S.cur);show("#renrow",false);show("#newrow",true);const i=$("#newname");i.value="";i.placeholder=(pre?pre+"/":"")+"nome.asm";i.focus()};
@@ -628,7 +628,12 @@ const MODS={};
 async function loadMod(n){if(MODS[n])return MODS[n];const bin=Uint8Array.from(atob(WASM_B64[n]),c=>c.charCodeAt(0));
  const raw=await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();return MODS[n]=await WebAssembly.compile(raw)}
 /* ---------- compilar ---------- */
-const split=s=>s.trim().split(/\s+/).filter(Boolean);
+/* separa por espaço, mas aceita "aspas" e junta pedaços que formam o caminho de um arquivo existente (pasta "New Folder/main.asm") */
+const split=s=>{const tk=[];String(s).replace(/"([^"]*)"|(\S+)/g,(m,a,b)=>{tk.push(a!==undefined?a:b);return m});
+ const low=new Set([...S.files.keys()].map(k=>k.toLowerCase()));const out=[];
+ for(let i=0;i<tk.length;i++){let best=0;let acc=tk[i];for(let j=i;j<tk.length;j++){if(j>i)acc+=" "+tk[j];if(low.has(normName(acc).toLowerCase()))best=j}
+  if(best>i){out.push(tk.slice(i,best+1).join(" "));i=best}else out.push(tk[i])}
+ return out.filter(Boolean)};
 const tick=()=>new Promise(r=>setTimeout(r,30));
 async function build(){
  flush();await save();for(const k in errLines)delete errLines[k];applyAllErr();const b=$("#build");b.disabled=true;b.textContent="Compilando…";logEl.textContent="";rom=null;$("#dlrom").disabled=true;
