@@ -81,6 +81,17 @@ button,select,input,textarea{font:inherit;color:inherit}
 .foldw{background:var(--sel);border:1px solid var(--line);border-radius:4px;padding:0 7px;margin-left:8px;color:var(--mut);cursor:pointer;font-size:11px}
 .btn.danger{color:var(--err)}
 
+/* ---- editor nativo (celular) ---- */
+.taw{height:430px;min-height:430px;background:var(--code);color:var(--fg);font:13px/19.5px var(--mono);overflow:auto;resize:vertical;position:relative;-webkit-overflow-scrolling:touch}
+.tain{display:flex;min-width:100%;min-height:100%}
+.tag{position:sticky;left:0;z-index:2;flex:none;background:var(--code);border-right:1px solid var(--line);color:var(--mut);text-align:right;padding:0 8px 0 6px;min-width:34px}
+.tan{height:19.5px}.tan.cm-errnum{background:var(--err);color:#fff}
+.tabody{position:relative;flex:1 0 auto;padding:0 0 0 8px}
+.tapre{white-space:pre;padding:0 40px 40px 0;pointer-events:none;min-height:100%}
+.tal{min-height:19.5px;height:19.5px}
+.tata{position:absolute;left:8px;top:0;right:0;bottom:0;width:calc(100% - 8px);height:100%;margin:0;padding:0 40px 40px 0;border:0;outline:0;resize:none;overflow:hidden;background:transparent;color:transparent;caret-color:var(--fg);font:inherit;white-space:pre;tab-size:4;-moz-tab-size:4}
+.tata::selection{background:var(--sel2);color:transparent}
+
 .bin{padding:26px 14px;color:var(--mut);font:13px var(--mono)}
 #log{margin:0;padding:10px;max-height:38vh;min-height:90px;overflow:auto;font:12.5px/1.5 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;background:var(--code);border-radius:0 0 10px 10px}
 #log .e{color:var(--err)}#log .w{color:var(--warn)}#log .o{color:var(--ok)}#log .m{color:var(--mut)}
@@ -273,6 +284,69 @@ function idb(){return new Promise((ok,no)=>{try{const r=indexedDB.open("snesbuil
 async function save(){try{const db=await idb();const o={files:[...S.files],cur:S.cur,main:S.main,o:S.o,open:[...S.open],selDir:S.selDir,selKind:S.selKind};db.transaction("k","readwrite").objectStore("k").put(o,"proj")}catch(e){}}
 async function restore(){try{const db=await idb();return await new Promise(ok=>{const r=db.transaction("k").objectStore("k").get("proj");r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}catch(e){return null}}
 let saveT=0;const saveSoon=()=>{clearTimeout(saveT);saveT=setTimeout(save,400)};
+/* ---------- editor nativo (celular): caixa de texto de verdade, com seleção por toque longo e alças ---------- */
+const IS_TA=!!window.SnesBridge||(window.matchMedia&&matchMedia("(pointer:coarse)").matches);
+class TADoc{constructor(t){this.text=t;this.a=0;this.h=0;this.sx=0;this.sy=0;this.eb=new Set();this.eg=new Set()}
+ lineCount(){return this.text.split("\n").length}
+ addLineClass(l,w,c){(w==="gutter"?this.eg:this.eb).add(l);this.rr&&this.rr();return {l,w}}
+ removeLineClass(h,w,c){(h.w==="gutter"?this.eg:this.eb).delete(h.l);this.rr&&this.rr()}}
+function TAEditor(host){
+ const root=document.createElement("div");root.className="taw cm-s-snes";
+ root.innerHTML='<div class="tain"><div class="tag" aria-hidden="true"></div><div class="tabody"><div class="tapre" aria-hidden="true"></div><textarea class="tata" wrap="off" spellcheck="false" autocapitalize="none" autocorrect="off" autocomplete="off" data-gramm="false" aria-label="Editor de código"></textarea></div></div>';
+ host.append(root);
+ const ta=root.querySelector("textarea"),pre=root.querySelector(".tapre"),gut=root.querySelector(".tag");
+ const mode=CodeMirror.getMode({},"asm65");
+ let doc=new TADoc(""),ov=null,marks=[],hs={change:[]},rT=0,cw=7.8,lh=19.5;
+ const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+ function measure(){const s=document.createElement("span");s.style.cssText="position:absolute;visibility:hidden;white-space:pre;font:inherit";s.textContent="0".repeat(50);root.append(s);const w=s.getBoundingClientRect().width/50;s.remove();if(w>2)cw=w;const x=parseFloat(getComputedStyle(ta).lineHeight);if(x>5)lh=x}
+ const starts=()=>{const t=ta.value,r=[0];for(let i=0;i<t.length;i++)if(t.charCodeAt(i)===10)r.push(i+1);return r};
+ function runs(text,fn){const st=new CodeMirror.StringStream(text,4,{}),out=new Array(text.length).fill("");let g=0;
+  while(!st.eol()&&g++<5000){st.start=st.pos;let s=null;try{s=fn(st)}catch(e){}if(st.pos<=st.start)st.pos=st.start+1;if(s)for(let i=st.start;i<st.pos;i++)out[i]=s}return out}
+ function render(){
+  const lines=ta.value.split("\n"),S=starts();let h="",gh="";
+  const ranges=marks.map(m=>[m.a,m.b,m.c]);
+  for(let i=0;i<lines.length;i++){
+   const t=lines[i],base=t?runs(t,s=>mode.token(s)):[],o=ov&&t?runs(t,s=>ov.token(s)):[];
+   const ex=new Array(t.length).fill("");
+   for(const r of ranges){const s0=Math.max(r[0],S[i]),e0=Math.min(r[1],S[i]+t.length);for(let k=s0;k<e0;k++)ex[k-S[i]]=r[2]}
+   let line="",j=0;
+   while(j<t.length){let k=j+1;const c=(base[j]||"")+"|"+(o[j]||"")+"|"+ex[j];while(k<t.length&&((base[k]||"")+"|"+(o[k]||"")+"|"+ex[k])===c)k++;
+    const cl=[];if(base[j])cl.push("cm-"+base[j]);if(o[j])cl.push("cm-"+o[j]);if(ex[j])cl.push(ex[j]);
+    line+=cl.length?'<span class="'+cl.join(" ")+'">'+esc(t.slice(j,k))+"</span>":esc(t.slice(j,k));j=k}
+   h+='<div class="tal'+(doc.eb.has(i)?" cm-errline":"")+'">'+(line||"&#8203;")+"</div>";
+   gh+='<div class="tan'+(doc.eg.has(i)?" cm-errnum":"")+'">'+(i+1)+"</div>"}
+  pre.innerHTML=h+'<div class="tal">&#8203;</div>';gut.innerHTML=gh}
+ const later=()=>{clearTimeout(rT);rT=setTimeout(render,40)};
+ function fire(){doc.text=ta.value;hs.change.forEach(f=>f())}
+ ta.addEventListener("input",()=>{render();fire();caretVisible()});
+ ta.addEventListener("beforeinput",e=>{if(e.inputType==="insertLineBreak"||(e.inputType==="insertParagraph")){const v=ta.value,p=ta.selectionStart,ls=v.lastIndexOf("\n",p-1)+1,ind=(/^[ \t]*/.exec(v.slice(ls,p))||[""])[0];if(ind){e.preventDefault();document.execCommand("insertText",false,"\n"+ind)}}});
+ ta.addEventListener("keydown",e=>{if(e.key==="Tab"){e.preventDefault();document.execCommand("insertText",false,"\t")}});
+ document.addEventListener("selectionchange",()=>{if(document.activeElement===ta)caretVisible()});
+ function caretVisible(){const p=ta.selectionEnd,t=ta.value.slice(0,p),l=t.split("\n").length-1,c=t.length-t.lastIndexOf("\n")-1;
+  const y=l*lh,x=c*cw+gut.offsetWidth;if(y<root.scrollTop)root.scrollTop=y;else if(y+lh+6>root.scrollTop+root.clientHeight)root.scrollTop=y+lh+6-root.clientHeight;
+  if(x<root.scrollLeft+gut.offsetWidth)root.scrollLeft=Math.max(0,x-gut.offsetWidth-20);else if(x+10>root.scrollLeft+root.clientWidth)root.scrollLeft=x+30-root.clientWidth}
+ const idx=p=>{const L=ta.value.split("\n");let n=0;const l=Math.max(0,Math.min(p.line,L.length-1));for(let i=0;i<l;i++)n+=L[i].length+1;return n+Math.max(0,Math.min(p.ch,L[l].length))};
+ const pos=i=>{const t=ta.value.slice(0,Math.max(0,Math.min(i,ta.value.length)));const l=t.split("\n").length-1;return {line:l,ch:t.length-(t.lastIndexOf("\n")+1)}};
+ const sel=(a,b,d)=>({anchor:pos(a),head:pos(b),from(){return pos(Math.min(a,b))},to(){return pos(Math.max(a,b))}});
+ const api={
+  getValue:()=>ta.value,getLine:l=>ta.value.split("\n")[l]||"",lineCount:()=>ta.value.split("\n").length,
+  posFromIndex:pos,indexFromPos:idx,refresh(){measure();render()},operation:f=>f(),focus(){try{ta.focus({preventScroll:true})}catch(e){ta.focus()}},hasFocus:()=>document.activeElement===ta,
+  on(ev,f){if(hs[ev])hs[ev].push(f)},getWrapperElement:()=>root,getInputField:()=>ta,setOption(){},
+  getRange:(a,b)=>ta.value.slice(idx(a),idx(b)),getSelection:()=>ta.value.slice(ta.selectionStart,ta.selectionEnd),
+  getCursor(w){return pos(w==="from"?ta.selectionStart:w==="to"?ta.selectionEnd:(ta.selectionDirection==="backward"?ta.selectionStart:ta.selectionEnd))},
+  listSelections:()=>[sel(ta.selectionStart,ta.selectionEnd)],
+  setSelection(a,h){const x=idx(a),y=idx(h||a);ta.setSelectionRange(Math.min(x,y),Math.max(x,y),x>y?"backward":"forward")},
+  setSelections(r){if(r&&r[0])api.setSelection(r[0].anchor,r[0].head)},
+  replaceRange(t,from,to){const a=idx(from),b=to?idx(to):a;ta.setRangeText(t,a,b,"end");render();fire()},
+  scrollIntoView(r,m){const p=r.from||r;const y=(p.line||0)*lh;const mm=m||60;if(y<root.scrollTop+mm||y>root.scrollTop+root.clientHeight-mm)root.scrollTop=Math.max(0,y-root.clientHeight/3)},
+  findWordAt(p){const L=api.getLine(p.line);let s=p.ch,e=p.ch;const w=/[\w@.$]/;while(s>0&&w.test(L[s-1]))s--;while(e<L.length&&w.test(L[e]))e++;return {anchor:{line:p.line,ch:s},head:{line:p.line,ch:e}}},
+  addOverlay(o){ov=o;later()},removeOverlay(){ov=null;later()},
+  markText(a,b,o){if(o&&o.collapsed)return {clear(){},find:()=>null,on(){}};const m={a:idx(a),b:idx(b),c:o&&o.className||""};marks.push(m);later();return {clear(){marks=marks.filter(x=>x!==m);later()},find:()=>({from:pos(m.a),to:pos(m.b)}),on(){}}},
+  getAllMarks:()=>[],setGutterMarker(){},clearGutter(){},
+  swapDoc(d){const old=doc;old.text=ta.value;old.a=ta.selectionStart;old.h=ta.selectionEnd;old.sx=root.scrollLeft;old.sy=root.scrollTop;doc=d;d.rr=later;ta.value=d.text;marks=[];try{ta.setSelectionRange(d.a,d.h)}catch(e){}render();root.scrollTop=d.sy;root.scrollLeft=d.sx;return old}};
+ try{new ResizeObserver(()=>{measure()}).observe(root)}catch(e){}
+ measure();doc.rr=later;render();return api}
+function newDoc(t){return IS_TA?new TADoc(t):CodeMirror.Doc(t,"asm65")}
 /* ---------- arquivos, pastas e editor ---------- */
 const fmtSize=n=>n<1024?n+" B":(n/1024).toFixed(1)+" KB";
 const dirOf=p=>p.includes("/")?p.slice(0,p.lastIndexOf("/")):"";
@@ -282,7 +356,7 @@ const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 const errLines={};
 let shown=null,dirty=false,syncT=0,foldT=0;
 const docs=new Map();
-function getDoc(p){let d=docs.get(p);if(!d){d=CodeMirror.Doc(dec.decode(S.files.get(p)||new Uint8Array(0)),"asm65");docs.set(p,d)}return d}
+function getDoc(p){let d=docs.get(p);if(!d){d=newDoc(dec.decode(S.files.get(p)||new Uint8Array(0)));docs.set(p,d)}return d}
 function putFile(p,bytes){S.files.set(p,bytes);docs.delete(p);if(shown===p){shown=null;dirty=false}}
 
 (function(){
@@ -300,7 +374,7 @@ function putFile(p,bytes){S.files.set(p,bytes);docs.delete(p);if(shown===p){show
 })();
 
 const MOBILE=/Android|iPhone|iPad/i.test(navigator.userAgent);
-const cm=CodeMirror($("#cmhost"),{value:"",mode:"asm65",inputStyle:MOBILE?"textarea":"contenteditable",spellcheck:false,autocorrect:false,autocapitalize:false,theme:"snes",lineNumbers:true,gutters:["CodeMirror-linenumbers","fold"],
+const cm=IS_TA?TAEditor($("#cmhost")):CodeMirror($("#cmhost"),{value:"",mode:"asm65",inputStyle:MOBILE?"textarea":"contenteditable",spellcheck:false,autocorrect:false,autocapitalize:false,theme:"snes",lineNumbers:true,gutters:["CodeMirror-linenumbers","fold"],
  inputStyle:"textarea",indentUnit:4,tabSize:4,indentWithTabs:true,undoDepth:200,historyEventDelay:500,lineWrapping:false,
  extraKeys:{
   "Ctrl-F":()=>openFind(),"Cmd-F":()=>openFind(),"F3":()=>findStep(1),"Shift-F3":()=>findStep(-1),
@@ -414,7 +488,7 @@ function computeFolds(){
  closeLab(n-1);closeSeg(n-1);return R}
 function foldMarks(){return cm.getAllMarks().filter(m=>m.__fold)}
 function foldedAt(l){return foldMarks().find(m=>{const r=m.find();return r&&r.from.line===l})}
-function refreshFoldGutter(){
+function refreshFoldGutter(){if(IS_TA)return;
  FR=computeFolds();cm.clearGutter("fold");const starts=new Set(foldMarks().map(m=>{const r=m.find();return r?r.from.line:-1}));
  cm.operation(()=>{FR.forEach((e,l)=>{const s=document.createElement("span");s.className="fm";const f=starts.has(l);s.textContent=f?"▸":"▾";s.title=f?"Expandir":"Recolher";cm.setGutterMarker(l,"fold",s)})})}
 function doFold(l,e){
@@ -427,6 +501,7 @@ cm.on("gutterClick",(c,l,g)=>{if(g==="fold")toggleFold(l)});
 function foldAll(){FR=computeFolds();let last=-1;cm.operation(()=>{[...FR.keys()].sort((a,b)=>a-b).forEach(l=>{if(l<=last)return;doFold(l,FR.get(l));last=FR.get(l)})});refreshFoldGutter()}
 function unfoldAll(){cm.operation(()=>foldMarks().forEach(m=>m.clear()));refreshFoldGutter()}
 function unfoldAt(l){foldMarks().forEach(m=>{const r=m.find();if(r&&r.from.line<l&&r.to.line>=l)m.clear()})}
+if(IS_TA){$("#foldall").hidden=true;$("#unfoldall").hidden=true}
 $("#foldall").onclick=foldAll;$("#unfoldall").onclick=unfoldAll;
 
 const F={on:false,case:false,word:false,list:[],idx:-1,over:null,mark:null};
@@ -555,7 +630,7 @@ $("#closeproj").onclick=function(){
  clearTimeout(closeArm);closeArm=0;this.textContent="Fechar projeto";
  flush();S.files=new Map();docs.clear();errApplied.clear();for(const k in errLines)delete errLines[k];
  S.cur="";S.main="main.asm";S.o.main="main.asm";S.o.cfg="snes.cfg";S.open=new Set();S.selDir="";S.selKind="file";shown=null;dirty=false;
- cm.swapDoc(CodeMirror.Doc("","asm65"));if(F.on)closeFind();
+ cm.swapDoc(newDoc(""));if(F.on)closeFind();
  fillOpts();showCur();renderTree();save();log("Projeto fechado: todos os arquivos e pastas foram removidos.","m")};
 /* ---------- opções ---------- */
 const OPT={main:"#o_main",cfg:"#o_cfg",out:"#o_out",ca:"#o_ca",ld:"#o_ld",emu:"#o_emu",emuPath:"#o_emupath"};
