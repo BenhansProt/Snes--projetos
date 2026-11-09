@@ -82,13 +82,13 @@ button,select,input,textarea{font:inherit;color:inherit}
 .btn.danger{color:var(--err)}
 
 /* ---- editor nativo (celular) ---- */
-.taw{height:430px;min-height:430px;background:var(--code);color:var(--fg);font:13px/19.5px var(--mono);overflow:auto;resize:vertical;position:relative;-webkit-overflow-scrolling:touch}
+.taw{height:430px;min-height:430px;background:var(--code);color:var(--fg);font:13px/20px var(--mono);overflow:auto;resize:vertical;position:relative;-webkit-overflow-scrolling:touch}
 .tain{display:flex;min-width:100%;min-height:100%}
 .tag{position:sticky;left:0;z-index:2;flex:none;background:var(--code);border-right:1px solid var(--line);color:var(--mut);text-align:right;padding:0 8px 0 6px;min-width:34px}
-.tan{height:19.5px}.tan.cm-errnum{background:var(--err);color:#fff}
+.tan{height:20px}.tan.cm-errnum{background:var(--err);color:#fff}
 .tabody{position:relative;flex:1 0 auto;padding:0 0 0 8px}
 .tapre{white-space:pre;tab-size:4;-moz-tab-size:4;font-variant-ligatures:none;padding:0 40px 40px 0;pointer-events:none;min-height:100%}
-.tal{min-height:19.5px;height:19.5px}
+.tal{min-height:20px;height:20px}
 .tata{position:absolute;left:8px;top:0;right:0;bottom:0;width:calc(100% - 8px);height:100%;margin:0;padding:0 40px 40px 0;border:0;outline:0;resize:none;overflow:hidden;background:transparent;color:transparent;caret-color:var(--fg);font:inherit;white-space:pre;tab-size:4;-moz-tab-size:4}
 .tata::selection{background:rgba(66,133,244,.38);color:transparent}
 .taw{-webkit-text-size-adjust:100%;text-size-adjust:100%;font-variant-ligatures:none}
@@ -298,7 +298,7 @@ function TAEditor(host){
  host.append(root);
  const ta=root.querySelector("textarea"),pre=root.querySelector(".tapre"),gut=root.querySelector(".tag");
  const mode=CodeMirror.getMode({},"asm65");
- let doc=new TADoc(""),ov=null,marks=[],hs={change:[]},rT=0,cw=7.8,lh=19.5;
+ let doc=new TADoc(""),ov=null,marks=[],hs={change:[]},rT=0,cw=7.8,lh=20;
  const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
  function measure(){const s=document.createElement("span");s.style.cssText="position:absolute;visibility:hidden;white-space:pre;font:inherit";s.textContent="0".repeat(50);root.append(s);const w=s.getBoundingClientRect().width/50;s.remove();if(w>2)cw=w;const x=parseFloat(getComputedStyle(ta).lineHeight);if(x>5)lh=x}
  const starts=()=>{const t=ta.value,r=[0];for(let i=0;i<t.length;i++)if(t.charCodeAt(i)===10)r.push(i+1);return r};
