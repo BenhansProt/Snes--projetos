@@ -19,6 +19,7 @@ jobs:
           mv file_paths.xml app/src/main/res/xml/file_paths.xml
           mv index.html app/src/main/assets/index.html
           for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p app/src/main/res/mipmap-$d; mv ic_$d.png app/src/main/res/mipmap-$d/ic_launcher.png; done
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p app/src/main/res/mipmap-$d; mv ic_$d.png app/src/main/res/mipmap-$d/ic_launcher.png; done
       - uses: actions/setup-java@v4
         with:
           distribution: temurin

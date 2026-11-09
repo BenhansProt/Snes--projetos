@@ -37,7 +37,8 @@ button,select,input,textarea{font:inherit;color:inherit}
 :root[data-theme="dark"]{--tk-com:#7f8c7e;--tk-str:#e3b17a;--tk-num:#7cc4e8;--tk-dir:#d6a3ef;--tk-lbl:#ff9e94;--tk-op:#a99dff;--sel2:#4a4380}
 .work{display:grid;grid-template-columns:240px minmax(0,1fr);gap:12px;align-items:start}
 .tree{max-height:calc(46vh + 150px);min-height:200px;overflow:auto;display:flex;flex-direction:column}
-.treehead{padding:9px 12px;font:600 11px var(--mono);letter-spacing:.12em;color:var(--mut);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.treehead{padding:9px 12px;font:600 11px var(--mono);letter-spacing:.12em;color:var(--mut);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:6px;position:sticky;top:0;background:var(--panel);z-index:1}
+.treehead .mini{letter-spacing:0;font-weight:500}
 #tree{padding:6px}
 .trow{display:flex;width:100%;gap:6px;align-items:center;border:0;background:transparent;padding:4px 8px;text-align:left;font:13px var(--mono);color:inherit;cursor:pointer;min-height:30px;border-radius:6px;touch-action:manipulation}
 .trow:hover{background:var(--sel)}
@@ -58,7 +59,7 @@ button,select,input,textarea{font:inherit;color:inherit}
 #cmhost{border-radius:0 0 10px 10px;overflow:hidden}
 @media (max-width:760px){.work{grid-template-columns:1fr}.tree{max-height:230px;min-height:0}}
 /* ---- CodeMirror com as cores da página ---- */
-.CodeMirror{height:60vh;min-height:408px;background:var(--code);color:var(--fg);font:13px/1.5 var(--mono);resize:vertical;overflow:hidden}
+.CodeMirror{height:430px;min-height:430px;background:var(--code);color:var(--fg);font:13px/1.5 var(--mono);resize:vertical;overflow:hidden}
 .CodeMirror-gutters{background:var(--code);border-right:1px solid var(--line)}
 .CodeMirror-linenumber{color:var(--mut);padding:0 8px 0 4px}
 .CodeMirror-cursor{border-left:2px solid var(--fg)}
@@ -110,7 +111,7 @@ footer{color:var(--mut);font-size:12px}
   <button class="btn" id="dlrom" type="button" disabled>Baixar ROM</button>
   <button class="btn" id="openemu" type="button" hidden>Abrir emulador</button>
   <button class="btn" id="imp" type="button">Importar arquivos / .zip</button>
-  <button class="btn" id="impdir" type="button" title="Importa uma pasta inteira (gráficos, sons…), mantendo as subpastas">Importar DADOS</button>
+  <button class="btn" id="impdir" type="button" title="Importa uma pasta inteira (gráficos, sons…), mantendo as subpastas">Importar pasta</button>
   <button class="btn danger" id="closeproj" type="button" title="Apaga tudo que está carregado no projeto (arquivos e pastas)">Fechar projeto</button>
   <button class="btn" id="expz" type="button">Baixar projeto (.zip)</button>
   <input id="file" type="file" multiple hidden>
@@ -119,7 +120,7 @@ footer{color:var(--mut);font-size:12px}
 
 <div class="work">
   <aside class="panel tree" aria-label="Pastas e arquivos do projeto">
-    <div class="treehead">PROJETO</div>
+    <div class="treehead"><span>PROJETO</span><button class="mini danger" id="closeproj" type="button" title="Remove todos os arquivos e pastas do projeto">Fechar projeto</button></div>
     <div id="tree" role="tree"></div>
   </aside>
   <section class="panel edpane" aria-label="Editor">
@@ -258,7 +259,7 @@ NMI:
 IRQ_end:
 	rti
 
-; Dados vindos de uma pasta importada (Importar DADOS): o caminho é relativo à pasta do projeto.
+; Dados vindos de uma pasta importada (Importar pasta): o caminho é relativo à pasta do projeto.
 TILE:
 	.incbin "graficos/exemplo.chr"   ; maiúsculas/minúsculas não importam
 `;
@@ -327,7 +328,7 @@ function showCur(){
  const n=S.cur,d=S.files.get(n);flushFindMark();
  $("#curname").textContent=(S.selKind==="dir"&&S.selDir?S.selDir+"/":n||"—")+(S.selKind!=="dir"&&n&&n===S.main?"  (principal)":"");
  const host=$("#cmhost"),bin=$("#bin");
- if(!d){host.hidden=true;shown=null;bin.hidden=false;bin.textContent="Nenhum arquivo. Use + Novo, Importar arquivos ou Importar DADOS.";return}
+ if(!d){host.hidden=true;shown=null;bin.hidden=false;bin.textContent="Nenhum arquivo. Use + Novo, Importar arquivos ou Importar pasta.";return}
  if(isText(n)){host.hidden=false;bin.hidden=true;if(shown!==n){flush();cm.swapDoc(getDoc(n));shown=n;dirty=false}applyErr(n);cm.refresh();refreshFoldGutter();if(F.on)findNow(false)}
  else{host.hidden=true;shown=null;bin.hidden=false;bin.textContent=n+" é um arquivo de dados ("+fmtSize(d.length)+"). Fica disponível para .incbin e .include, mas não é editável aqui."}
  $("#setmain").hidden=S.selKind==="dir"||!/\.(asm|s)$/i.test(n)||n===S.main;
@@ -485,6 +486,17 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
  if(shown!==f)return;const ln=Math.max(0,Math.min(l-1,cm.lineCount()-1));unfoldAt(ln);
  cm.setSelection({line:ln,ch:0},{line:ln,ch:cm.getLine(ln).length});cm.scrollIntoView({line:ln,ch:0},120);cm.focus();
  $("#cmhost").scrollIntoView({block:"nearest",behavior:"smooth"})}
+
+/* ---- fechar o projeto inteiro ---- */
+let closeProjArm=0;
+$("#closeproj").onclick=function(){
+ if(!S.files.size)return;
+ if(!closeProjArm){closeProjArm=1;this.textContent="Confirmar: apagar tudo";setTimeout(()=>{closeProjArm=0;this.textContent="Fechar projeto"},3500);return}
+ closeProjArm=0;this.textContent="Fechar projeto";
+ S.files=new Map();docs.clear();S.cur="";S.main="";S.selDir="";S.selKind="file";S.open=new Set();
+ for(const k of Object.keys(errLines))delete errLines[k];errApplied.clear();shown=null;dirty=false;
+ cm.swapDoc(CodeMirror.Doc("","asm65"));closeFind&&F.on&&closeFind();
+ showCur();renderTree();save();log("Projeto fechado: todos os arquivos foram removidos.","m")};
 /* ---------- download ---------- */
 const BR=()=>window.SnesBridge||null;
 function b64(d){let s="";for(let i=0;i<d.length;i+=0x8000)s+=String.fromCharCode.apply(null,d.subarray(i,i+0x8000));return btoa(s)}
@@ -523,7 +535,7 @@ $("#dirinput").onchange=async e=>{flush();const fs=[...e.target.files];if(!fs.le
  try{for(const f of fs){const rel=normName(f.webkitRelativePath||f.name);if(rel.split("/").some(s=>s.startsWith(".")))continue;
   putFile(rel,new Uint8Array(await f.arrayBuffer()));add++;if(rel.includes("/"))tops.add(rel.split("/")[0])}}
  catch(er){log("Erro ao importar a pasta: "+er.message,"e")}
- tops.forEach(t=>S.open.add(t));e.target.value="";b.disabled=false;b.textContent="Importar DADOS";
+ tops.forEach(t=>S.open.add(t));e.target.value="";b.disabled=false;b.textContent="Importar pasta";
  afterImport(add,"arquivo(s) de dados importado(s) das pastas: "+[...tops].join(", ")+".")};
 function afterImport(add,msg){
  if(![...S.files.keys()].includes(S.main)){const m=[...S.files.keys()].find(k=>/(^|\/)main\.asm$/i.test(k));if(m)S.main=S.o.main=m}
