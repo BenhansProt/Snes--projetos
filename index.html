@@ -301,7 +301,7 @@ function putFile(p,bytes){S.files.set(p,bytes);docs.delete(p);if(shown===p){show
 
 const MOBILE=/Android|iPhone|iPad/i.test(navigator.userAgent);
 const cm=CodeMirror($("#cmhost"),{value:"",mode:"asm65",inputStyle:MOBILE?"textarea":"contenteditable",spellcheck:false,autocorrect:false,autocapitalize:false,theme:"snes",lineNumbers:true,gutters:["CodeMirror-linenumbers","fold"],
- indentUnit:4,tabSize:4,indentWithTabs:true,undoDepth:200,historyEventDelay:500,lineWrapping:false,
+ inputStyle:"textarea",indentUnit:4,tabSize:4,indentWithTabs:true,undoDepth:200,historyEventDelay:500,lineWrapping:false,
  extraKeys:{
   "Ctrl-F":()=>openFind(),"Cmd-F":()=>openFind(),"F3":()=>findStep(1),"Shift-F3":()=>findStep(-1),
   "Ctrl-L":()=>selAllOcc(),"Cmd-L":()=>selAllOcc(),"Ctrl-Shift-L":()=>selAllOcc(),
@@ -310,7 +310,13 @@ const cm=CodeMirror($("#cmhost"),{value:"",mode:"asm65",inputStyle:MOBILE?"texta
   "Ctrl-Enter":()=>build(),
   "Tab":c=>c.somethingSelected()?c.indentSelection("add"):c.replaceSelection("\t","end"),
   "Shift-Tab":c=>c.indentSelection("subtract")}});
-try{const i=cm.getInputField();i.setAttribute("spellcheck","false");i.setAttribute("autocapitalize","off");i.setAttribute("autocorrect","off")}catch(e){}
+try{const i=cm.getInputField();i.setAttribute("spellcheck","false");i.setAttribute("autocapitalize","none");i.setAttribute("autocorrect","off");i.setAttribute("autocomplete","off");i.setAttribute("data-gramm","false");i.setAttribute("inputmode","text");i.setAttribute("enterkeyhint","enter")}catch(e){}
+/* celular: um toque em qualquer ponto da área de texto sempre foca (abre o teclado e mostra o cursor), mesmo antes de abrir um arquivo */
+(function(){const w=cm.getWrapperElement();let t=0;
+ w.addEventListener("touchstart",()=>{t=Date.now()},{passive:true});
+ w.addEventListener("touchend",()=>{if(Date.now()-t<400)setTimeout(()=>{if(!cm.hasFocus())cm.focus()},0)},{passive:true});
+ window.addEventListener("load",()=>cm.refresh());document.addEventListener("visibilitychange",()=>{if(!document.hidden)cm.refresh()});
+ setTimeout(()=>cm.refresh(),300);setTimeout(()=>cm.refresh(),1200)})();
 /* celular: o foco precisa acontecer dentro do toque, senão o Android não abre o teclado */
 try{const w=cm.getWrapperElement();const tf=ev=>{if(ev.target.closest&&ev.target.closest(".CodeMirror-gutters"))return;setTimeout(()=>{},0);cm.focus()};
  w.addEventListener("touchend",tf,{passive:true});w.addEventListener("click",tf)}catch(er){}
