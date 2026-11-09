@@ -39,6 +39,9 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         web = new WebView(this);
         setContentView(web);
+        web.setFocusable(true);
+        web.setFocusableInTouchMode(true);
+        web.requestFocus();
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);

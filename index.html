@@ -299,7 +299,8 @@ function putFile(p,bytes){S.files.set(p,bytes);docs.delete(p);if(shown===p){show
   st.next();return null}}));
 })();
 
-const cm=CodeMirror($("#cmhost"),{value:"",mode:"asm65",theme:"snes",lineNumbers:true,gutters:["CodeMirror-linenumbers","fold"],
+const MOBILE=/Android|iPhone|iPad/i.test(navigator.userAgent);
+const cm=CodeMirror($("#cmhost"),{value:"",mode:"asm65",inputStyle:MOBILE?"textarea":"contenteditable",spellcheck:false,autocorrect:false,autocapitalize:false,theme:"snes",lineNumbers:true,gutters:["CodeMirror-linenumbers","fold"],
  indentUnit:4,tabSize:4,indentWithTabs:true,undoDepth:200,historyEventDelay:500,lineWrapping:false,
  extraKeys:{
   "Ctrl-F":()=>openFind(),"Cmd-F":()=>openFind(),"F3":()=>findStep(1),"Shift-F3":()=>findStep(-1),
@@ -310,6 +311,9 @@ const cm=CodeMirror($("#cmhost"),{value:"",mode:"asm65",theme:"snes",lineNumbers
   "Tab":c=>c.somethingSelected()?c.indentSelection("add"):c.replaceSelection("\t","end"),
   "Shift-Tab":c=>c.indentSelection("subtract")}});
 try{const i=cm.getInputField();i.setAttribute("spellcheck","false");i.setAttribute("autocapitalize","off");i.setAttribute("autocorrect","off")}catch(e){}
+/* celular: o foco precisa acontecer dentro do toque, senão o Android não abre o teclado */
+try{const w=cm.getWrapperElement();const tf=ev=>{if(ev.target.closest&&ev.target.closest(".CodeMirror-gutters"))return;setTimeout(()=>{},0);cm.focus()};
+ w.addEventListener("touchend",tf,{passive:true});w.addEventListener("click",tf)}catch(er){}
 try{new ResizeObserver(()=>cm.refresh()).observe($("#cmhost"))}catch(e){}
 
 function flush(){if(dirty&&shown&&S.files.has(shown)){S.files.set(shown,enc.encode(cm.getValue()))}dirty=false}
