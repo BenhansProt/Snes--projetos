@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.database.Cursor;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -34,6 +35,7 @@ public class MainActivity extends Activity {
 
     private static final int REQ_ARQUIVOS = 1;
     private static final int REQ_PASTA = 2;
+    private static final int REQ_IMG = 3;
     private WebView web;
     private ValueCallback<Uri[]> seletor;
 
@@ -127,8 +129,43 @@ public class MainActivity extends Activity {
         return n;
     }
 
+    /** Lê as imagens escolhidas e entrega cada uma à página (nome, base64, tipo). */
+    private void lerImagens(final Intent data) {
+        new Thread(() -> {
+            try {
+                java.util.ArrayList<Uri> us = new java.util.ArrayList<>();
+                if (data.getClipData() != null) {
+                    for (int i = 0; i < data.getClipData().getItemCount(); i++) us.add(data.getClipData().getItemAt(i).getUri());
+                } else if (data.getData() != null) us.add(data.getData());
+                for (Uri u : us) {
+                    String nome = "imagem.png";
+                    try (Cursor c = getContentResolver().query(u, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+                        if (c != null && c.moveToFirst() && c.getString(0) != null) nome = c.getString(0);
+                    } catch (Exception e) { }
+                    String mime = getContentResolver().getType(u);
+                    if (mime == null) mime = "image/png";
+                    try (InputStream in = getContentResolver().openInputStream(u)) {
+                        ByteArrayOutputStream o = new ByteArrayOutputStream();
+                        byte[] b = new byte[65536];
+                        int k;
+                        while ((k = in.read(b)) > 0) o.write(b, 0, k);
+                        String b64 = Base64.encodeToString(o.toByteArray(), Base64.NO_WRAP);
+                        String n = nome.replace("\\", "_").replace("'", "_");
+                        js("window.__imgNativa&&window.__imgNativa('" + n + "','" + b64 + "','" + mime + "')");
+                    }
+                }
+            } catch (Exception e) {
+                aviso("Erro ao abrir a imagem: " + e);
+            }
+        }).start();
+    }
+
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
+        if (req == REQ_IMG) {
+            if (res == RESULT_OK && data != null) lerImagens(data);
+            return;
+        }
         if (req == REQ_PASTA) {
             if (res == RESULT_OK && data != null && data.getData() != null) lerPasta(data.getData());
             else js("window.pastaNativaFim&&window.pastaNativaFim(-1)");
@@ -213,6 +250,22 @@ public class MainActivity extends Activity {
                 CharSequence s = c.getPrimaryClip().getItemAt(0).coerceToText(MainActivity.this);
                 return s == null ? "" : s.toString();
             } catch (Exception e) { return ""; }
+        }
+
+        /** Abre o seletor de imagens do Android (várias de uma vez). */
+        @JavascriptInterface
+        public void escolherImagens() {
+            runOnUiThread(() -> {
+                try {
+                    Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                    i.setType("image/*");
+                    i.addCategory(Intent.CATEGORY_OPENABLE);
+                    i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    startActivityForResult(Intent.createChooser(i, "Escolher imagem"), REQ_IMG);
+                } catch (Exception e) {
+                    aviso("Não consegui abrir o seletor de imagens: " + e);
+                }
+            });
         }
 
         /** Abre o seletor de PASTA do Android (o WebView não sabe escolher pastas sozinho). */
