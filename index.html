@@ -157,6 +157,24 @@ header h1 small{font-weight:400}
 .dhead{color:var(--mut);font-size:12px}
 #d_stop{padding:7px 10px;border-radius:8px;background:rgba(221,51,51,.16);border:1px solid #d33}
 @media(max-width:560px){.dregs{grid-template-columns:repeat(2,1fr)}.dflags{grid-template-columns:repeat(5,1fr)}}
+/* visores PPU */
+#dbgpane .vw{padding:6px 2px;font-size:12px;color:inherit}
+.pvc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0}
+.pvc select{background:transparent;color:inherit;border:1px solid rgba(127,127,127,.5);border-radius:4px;padding:3px;font-size:12px}
+.pvinfo{margin:4px 0;padding:5px 7px;background:rgba(127,127,127,.14);border-radius:5px;line-height:1.45;word-break:break-word;color:inherit}
+.pvinfo b{color:#2f6fe0}
+.pvh{margin:8px 0 3px;font-weight:700;opacity:.75}
+.pvscroll{max-height:52vh;overflow:auto;background:#0b0d12;border:1px solid rgba(127,127,127,.4);border-radius:5px}
+.pvscroll.sh{max-height:40vh}.pvscroll.mp{max-height:58vh}
+.pvscroll canvas,.pvscr{image-rendering:pixelated;display:block}
+.pvscroll.sh canvas,.pvscroll.mp canvas{width:100%}
+.pvscr{width:100%;max-width:512px;background:#111;border:1px solid rgba(127,127,127,.4);border-radius:4px}
+.pvrow{display:flex}.ruler{width:46px;flex:none;font:9px monospace;color:#9aa3b8;background:#12151d}
+.ruler i{display:block;height:16px;line-height:16px;font-style:normal;text-align:right;padding-right:3px;box-sizing:border-box;border-top:1px solid #1f2533}
+.rr{display:flex;gap:6px;align-items:baseline;padding:3px 4px;border-bottom:1px solid rgba(127,127,127,.25);flex-wrap:wrap}
+.rr .ra{opacity:.6;font-family:monospace;width:44px}.rr .rn{font-weight:700;width:70px}.rr .rv{font-family:monospace;color:#c27a00;width:22px}.rr .rd{flex:1;min-width:140px}
+.rr.chg{background:rgba(80,200,80,.25)}
+#vwSpr details{margin-top:6px}#vwSpr pre{max-height:200px;overflow:auto;font-size:11px}
 
 </style>
 </head>
@@ -195,7 +213,11 @@ header h1 small{font-weight:400}
       <button class="mini" id="ren" type="button">Renomear</button>
       <button class="mini" id="dlf" type="button">Baixar</button>
       <button class="mini danger" id="del" type="button">Apagar</button>
-      <button class="mini tog" id="dbgbtn" type="button" aria-pressed="false" title="Roda a ROM passo a passo no simulador da CPU 65816">Debugger</button></div>
+      <button class="mini tog" id="dbgbtn" type="button" aria-pressed="false" title="Roda a ROM passo a passo no simulador da CPU 65816">Debugger</button>
+      <button class="mini tog" id="vSpr" type="button" aria-pressed="false" title="Sprites (OAM): grade, tamanho e posição">Sprites</button>
+      <button class="mini tog" id="vMap" type="button" aria-pressed="false" title="Mapas dos BGs">Tilemap</button>
+      <button class="mini tog" id="vTil" type="button" aria-pressed="false" title="Tiles na VRAM">Tiles</button>
+      <button class="mini tog" id="vPpu" type="button" aria-pressed="false" title="Registradores da PPU">PPU</button></div>
     <div class="find" id="findbar" hidden>
       <input id="fq" type="text" placeholder="Buscar" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Texto a buscar">
       <span id="fcount" aria-live="polite"></span>
@@ -353,7 +375,7 @@ CPX immx,SBC idx,SEP imm1,SBC sr,CPX dp,SBC dp,INC dp,SBC idl,INX imp,SBC imm,NO
 BEQ rel,SBC idy,SBC idp,SBC sry,PEA abs,SBC dpx,INC dpx,SBC idly,SED imp,SBC aby,PLX imp,XCE imp,JSR iax,SBC abx,INC abx,SBC alx`).replace(/\n/g,"").split(",").forEach(s=>{const[a,b]=s.trim().split(" ");OPS.push([a,b])});
 const hx=(n,d)=>n.toString(16).toUpperCase().padStart(d,"0");
 function SnesCPU(rom,map){
- let cur={w:[],l:0};const c={hist:[],rom,map:map||"lorom",wram:new Uint8Array(0x20000),io:new Uint8Array(0x6000),iolog:[],a:0,x:0,y:0,s:0x1FF,d:0,db:0,pb:0,pc:0,p:0x34,e:1,steps:0,cycles:0,halted:false,waiting:false,hv:0,stop:""};
+ let cur={w:[],l:0};const ppu={vram:new Uint8Array(65536),cgram:new Uint8Array(512),oam:new Uint8Array(544),pr:new Uint8Array(64),S:new Int32Array(32)};const c={ppu,hist:[],rom,map:map||"lorom",wram:new Uint8Array(0x20000),io:new Uint8Array(0x6000),iolog:[],a:0,x:0,y:0,s:0x1FF,d:0,db:0,pb:0,pc:0,p:0x34,e:1,steps:0,cycles:0,halted:false,waiting:false,hv:0,stop:""};
  const P={C:1,Z:2,I:4,D:8,X:0x10,M:0x20,V:0x40,N:0x80};
  const m8=()=>c.e||(c.p&0x20),x8=()=>c.e||(c.p&0x10);
  function romIdx(b,o){const n=rom.length;if(!n)return -1;if(c.map==="hirom")return ((b&0x3F)*0x10000+o)%n;return ((b&0x7F)*0x8000+(o&0x7FFF))%n}
@@ -370,7 +392,33 @@ function SnesCPU(rom,map){
   if(b===0x7E||b===0x7F){const i=((b&1)<<16)|o;cur.w.push(i,c.wram[i]);c.wram[i]=v;return}
   if(b<0x40||(b>=0x80&&b<0xC0)){
    if(o<0x2000){cur.w.push(o,c.wram[o]);c.wram[o]=v;return}
-   if(o<0x6000){cur.w.push(0x20000+o-0x2000,c.io[o-0x2000]);c.io[o-0x2000]=v;c.iolog.push([a,v,c.pcAt]);cur.l++;if(c.iolog.length>200){c.iolog.shift()}}}}
+   if(o<0x6000){cur.w.push(0x20000+o-0x2000,c.io[o-0x2000]);c.io[o-0x2000]=v;c.iolog.push([a,v,c.pcAt]);cur.l++;if(c.iolog.length>200){c.iolog.shift()}
+    if(o>=0x2100&&o<=0x213F)ppuW(o,v);else if(o===0x420B)dma(v)}}}
+
+ const sS=(k,v)=>{if(ppu.S[k]!==v){cur.w.push(0x4000000+k,ppu.S[k]);ppu.S[k]=v}};
+ const sP=(k,v)=>{if(ppu.pr[k]!==v){cur.w.push(0x5000000+k,ppu.pr[k]);ppu.pr[k]=v}};
+ const sV=(i,v)=>{i&=0xFFFF;if(ppu.vram[i]!==v){cur.w.push(0x1000000+i,ppu.vram[i]);ppu.vram[i]=v}};
+ const sC=(i,v)=>{i&=0x1FF;if(ppu.cgram[i]!==v){cur.w.push(0x2000000+i,ppu.cgram[i]);ppu.cgram[i]=v}};
+ const sO=(i,v)=>{i&=0x3FF;if(i>=544)return;if(ppu.oam[i]!==v){cur.w.push(0x3000000+i,ppu.oam[i]);ppu.oam[i]=v}};
+ function ppuW(o,v){const S=ppu.S,r=o-0x2100;sP(r,v);
+  switch(o){
+  case 0x2102:sS(2,(((S[2]>>1)&0x100)|v)<<1);break;
+  case 0x2103:sS(2,(((v&1)<<8)|((S[2]>>1)&0xFF))<<1);break;
+  case 0x2104:{const a=S[2];if(a>=512)sO(512+(a&31),v);else if(a&1){sO(a-1,S[3]);sO(a,v)}else sS(3,v);sS(2,(a+1)&0x3FF);break}
+  case 0x2115:sS(1,v);break;
+  case 0x2116:sS(0,(S[0]&0xFF00)|v);break;case 0x2117:sS(0,(S[0]&0xFF)|(v<<8));break;
+  case 0x2118:case 0x2119:{const i=(S[0]<<1)&0xFFFF;sV(i+(o&1),v);if(((S[1]&0x80)?1:0)===(o&1))sS(0,(S[0]+[1,32,128,128][S[1]&3])&0x7FFF);break}
+  case 0x2121:sS(4,v);sS(5,0);break;
+  case 0x2122:if(!S[5]){sS(6,v);sS(5,1)}else{sC(S[4]*2,S[6]);sC(S[4]*2+1,v&0x7F);sS(4,(S[4]+1)&255);sS(5,0)}break;
+  default:if(o>=0x210D&&o<=0x2114){const k=16+o-0x210D;sS(k,((v<<8)|S[8])&0x3FF);sS(8,v)}}}
+ function dma(mask){
+  for(let ch=0;ch<8;ch++){if(!(mask&(1<<ch)))continue;const b=0x4300+ch*16-0x2000,ctl=c.io[b],bb=c.io[b+1];
+   let src=c.io[b+2]|c.io[b+3]<<8|c.io[b+4]<<16,n=c.io[b+5]|c.io[b+6]<<8;if(!n)n=0x10000;
+   const mode=ctl&7,step=(ctl&0x08)?0:(ctl&0x10)?-1:1,off=[[0],[0,1],[0,0],[0,0,1,1],[0,1,2,3],[0,1,0,1],[0,0],[0,0,1,1]][mode];
+   c.iolog.push([0x420B,mask,c.pcAt]);cur.l++;if(c.iolog.length>200)c.iolog.shift();
+   if(ctl&0x80){continue}
+   for(let i=0;i<n;i++){const v=rd(src);ppuW(0x2100+((bb+off[i%off.length])&0xFF),v);src=(src&0xFF0000)|((src+step)&0xFFFF)}
+   c.io[b+5]=0;c.io[b+6]=0}}
  const rdw=(a,w)=>w===2?rd(a)|rd(a+1)<<8:rd(a);
  const wrw=(a,v,w)=>{wr(a,v);if(w===2)wr(a+1,v>>8)};
  const f8=()=>{const v=rd(c.pb<<16|c.pc);c.pc=(c.pc+1)&0xFFFF;return v};
@@ -417,9 +465,9 @@ function SnesCPU(rom,map){
  function setP(v){c.p=v&0xFF;if(c.e)c.p|=0x30;if(c.p&0x10||c.e){c.x&=0xFF;c.y&=0xFF}}
  function irq(vec,native){push8(c.pb);}
  function interrupt(vecN,vecE){if(!c.e){push8(c.pb)}push16(c.pc);push8(c.p&(c.e?0xFF:0xFF));c.p=(c.p|4)&~8;c.pb=0;const v=c.e?vecE:vecN;c.pc=rd(v)|rd(v+1)<<8}
- c.back=()=>{const h=c.hist.pop();if(!h)return false;for(let i=h.w.length-2;i>=0;i-=2){const a=h.w[i],v=h.w[i+1];if(a>=0x20000)c.io[a-0x20000]=v;else c.wram[a]=v}
+ c.back=()=>{const h=c.hist.pop();if(!h)return false;for(let i=h.w.length-2;i>=0;i-=2){const a=h.w[i],v=h.w[i+1],sp=a>>>24,k=a&0xFFFFFF;if(sp===0){if(a>=0x20000)c.io[a-0x20000]=v;else c.wram[a]=v}else if(sp===1)ppu.vram[k]=v;else if(sp===2)ppu.cgram[k]=v;else if(sp===3)ppu.oam[k]=v;else if(sp===4)ppu.S[k]=v;else if(sp===5)ppu.pr[k]=v}
   if(h.l)c.iolog.length=Math.max(0,c.iolog.length-h.l);[c.a,c.x,c.y,c.s,c.d,c.db,c.pb,c.pc,c.p,c.e,c.steps,c.cycles,c.hv]=h.r;c.halted=false;c.stop="";return true};
- c.reset=()=>{c.hist=[];cur={w:[],l:0};c.a=c.x=c.y=0;c.s=0x1FF;c.d=0;c.db=0;c.pb=0;c.p=0x34;c.e=1;c.steps=0;c.cycles=0;c.halted=false;c.waiting=false;c.stop="";c.wram.fill(0);c.io.fill(0);c.iolog=[];c.hv=0;c.pc=rd(0xFFFC)|rd(0xFFFD)<<8};
+ c.reset=()=>{c.hist=[];cur={w:[],l:0};c.a=c.x=c.y=0;c.s=0x1FF;c.d=0;c.db=0;c.pb=0;c.p=0x34;c.e=1;c.steps=0;c.cycles=0;c.halted=false;c.waiting=false;c.stop="";c.wram.fill(0);c.io.fill(0);ppu.vram.fill(0);ppu.cgram.fill(0);ppu.oam.fill(0);ppu.pr.fill(0);ppu.S.fill(0);c.iolog=[];c.hv=0;c.pc=rd(0xFFFC)|rd(0xFFFD)<<8};
  c.step=()=>{
   if(c.halted)return false;
   cur={w:[],l:0,r:[c.a,c.x,c.y,c.s,c.d,c.db,c.pb,c.pc,c.p,c.e,c.steps,c.cycles,c.hv]};c.hist.push(cur);if(c.hist.length>20000)c.hist.shift();
@@ -836,6 +884,145 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
  window.addEventListener("scroll",place,{passive:true});window.addEventListener("resize",place);
  let raf=0;(function loop(){if(mode!=="none")place();raf=requestAnimationFrame(loop)})();
 })();
+/* ---------- VISORES DA PPU (Sprites / Tilemap / Tiles / Registros) ---------- */
+window.PPUV=(function(){
+ const H=(n,d)=>(n>>>0).toString(16).toUpperCase().padStart(d,"0");
+ const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+ const pal=new Uint32Array(256);let gray=false;
+ function loadPal(cg){let any=0;for(let i=0;i<256;i++){const c=cg[i*2]|cg[i*2+1]<<8;any|=c;pal[i]=(0xFF000000|((c>>10&31)*255/31|0)<<16|((c>>5&31)*255/31|0)<<8|(c&31)*255/31|0)>>>0}gray=!any}
+ const grayc=(v,b)=>{const g=(v*255/((1<<b)-1))|0;return(0xFF000000|g<<16|g<<8|g)>>>0};
+ function dec(vr,a,bpp,o){for(let y=0;y<8;y++)for(let x=0;x<8;x++){let v=0;const m=7-x;for(let p=0;p<bpp;p++)v|=((vr[(a+(p>>1)*16+y*2+(p&1))&0xFFFF]>>m)&1)<<p;o[y*8+x]=v}}
+ function put(buf,W,dx,dy,t,bpp,base,fh,fv,tr){const Hh=buf.length/W;
+  for(let y=0;y<8;y++){const py=dy+y;if(py<0||py>=Hh)continue;for(let x=0;x<8;x++){const px=dx+x;if(px<0||px>=W)continue;
+   const v=t[(fv?7-y:y)*8+(fh?7-x:x)];if(!v&&tr)continue;buf[py*W+px]=gray?grayc(v,bpp):pal[(base+v)&255]}}}
+ function canvas(w,h){const cv=document.createElement("canvas");cv.width=w;cv.height=h;const ctx=cv.getContext("2d");const img=ctx.createImageData(w,h);return{cv,ctx,img,buf:new Uint32Array(img.data.buffer)}}
+ const fill=(b,c)=>b.buf.fill(c);
+ const sel=(id,opts,val)=>'<select data-k="'+id+'">'+opts.map(([v,l])=>'<option value="'+v+'"'+(v==val?" selected":"")+">"+l+"</option>").join("")+"</select>";
+ const st={Til:{bpp:4,pal:0,sel:-1},Spr:{sel:0,out:true},Map:{bg:0,view:true,grid:false,sel:null}};
+ const pr=(c,a)=>c.ppu.pr[a-0x2100];
+
+ /* ===== TILES ===== */
+ function tiles(box,c){
+  const s=st.Til;
+  if(!box.dataset.i){box.dataset.i=1;
+   box.innerHTML='<div class="pvc">Cores:'+sel("bpp",[[2,"2bpp"],[4,"4bpp"],[8,"8bpp"]],s.bpp)+' Paleta:<select data-k="pal"></select></div><div class="pvinfo" id="tInfo">Toque num tile para ver a posição na VRAM.</div><div class="pvscroll"><div class="pvrow"><div class="ruler" id="tRul"></div><canvas id="tCv"></canvas></div></div>';
+   box.onchange=e=>{const k=e.target.dataset.k;if(!k)return;s[k]=+e.target.value;if(k==="bpp")s.pal=0;s.sel=-1;box.dataset.r=0;tiles(box,c)};
+   box.querySelector("#tCv").onclick=e=>{const r=e.target.getBoundingClientRect(),col=Math.floor((e.clientX-r.left)/r.width*16),row=Math.floor((e.clientY-r.top)/r.height*(e.target.height/8));s.sel=row*16+col;tiles(box,c)}}
+  const bpp=s.bpp,bt=bpp*8,N=65536/bt,rows=Math.ceil(N/16),ps=box.querySelector('[data-k=pal]');
+  if(ps.dataset.b!=bpp){ps.dataset.b=bpp;const n=bpp===2?32:bpp===4?16:1,sz=bpp===2?4:16;ps.innerHTML=Array.from({length:n},(_,k)=>'<option value="'+k*sz+'">'+(bpp===8?"direta":bpp===2?"CGRAM "+k*4:(k<8?"BG ":"OBJ ")+(k&7)+" (CGRAM "+k*16+")")+"</option>").join("");ps.value=s.pal}
+  loadPal(c.ppu.cgram);const cv=box.querySelector("#tCv"),W=128,Hh=rows*8;
+  if(cv.width!==W||cv.height!==Hh){cv.width=W;cv.height=Hh;cv.style.width="256px";cv.style.height=Hh*2+"px"}
+  const ctx=cv.getContext("2d"),img=ctx.createImageData(W,Hh),buf=new Uint32Array(img.data.buffer),t=new Uint8Array(64);
+  for(let i=0;i<N;i++){dec(c.ppu.vram,i*bt,bpp,t);put(buf,W,(i&15)*8,(i>>4)*8,t,bpp,+s.pal,0,0,false)}
+  ctx.putImageData(img,0,0);
+  if(s.sel>=0&&s.sel<N){ctx.strokeStyle="#ff0";ctx.lineWidth=1;ctx.strokeRect((s.sel&15)*8+.5,(s.sel>>4)*8+.5,7,7);const b=s.sel*bt;
+   box.querySelector("#tInfo").innerHTML="Tile <b>#"+s.sel+"</b> ($"+H(s.sel,3)+") · VRAM palavra <b>$"+H(b>>1,4)+"</b> · byte $"+H(b,4)+" · col "+(s.sel&15)+", linha "+(s.sel>>4)}
+  if(box.dataset.r!=="1"+bpp){box.dataset.r="1"+bpp;const rl=box.querySelector("#tRul");rl.style.height=Hh*2+"px";let h="";for(let r=0;r<rows;r++)h+="<i>$"+H(r*16*bt/2,4)+"</i>";rl.innerHTML=h}}
+
+ /* ===== SPRITES ===== */
+ const SZ=[[8,16],[8,32],[8,64],[16,32],[16,64],[32,64],[[16,32],[32,64]],[[16,32],[32,32]]];
+ function sizes(m){const q=[[[8,8],[16,16]],[[8,8],[32,32]],[[8,8],[64,64]],[[16,16],[32,32]],[[16,16],[64,64]],[[32,32],[64,64]],[[16,32],[32,64]],[[16,32],[32,32]]][m&7];return q}
+ function getSpr(c){const o=c.ppu.oam,ob=pr(c,0x2101),q=sizes(ob>>5),a=[];
+  for(let i=0;i<128;i++){const hb=o[512+(i>>2)]>>((i&3)*2)&3,at=o[i*4+3];let x=o[i*4]|(hb&1)<<8;if(x>=256)x-=512;
+   const big=hb>>1&1,[w,h]=q[big];a.push({i,x,y:o[i*4+1],t:o[i*4+2],pal:at>>1&7,pri:at>>4&3,hf:at>>6&1,vf:at>>7&1,nt:at&1,w,h,big})}
+  return a}
+ function tbyte(ob,nt,t){const gap=ob>>3&3;return(((ob&7)<<13)+(nt?(gap+1)<<12:0)+t*16&0x7FFF)*2}
+ function drawSpr(buf,W,dx,dy,s,ob,vr){const wt=s.w>>3,ht=s.h>>3,t8=new Uint8Array(64);
+  for(let ty=0;ty<ht;ty++)for(let tx=0;tx<wt;tx++){const sx=s.hf?wt-1-tx:tx,sy=s.vf?ht-1-ty:ty,t=((((s.t>>4)+sy)&15)<<4)|(((s.t&15)+sx)&15);
+   dec(vr,tbyte(ob,s.nt,t),4,t8);put(buf,W,dx+tx*8,dy+ty*8,t8,4,128+s.pal*16,s.hf,s.vf,true)}}
+ function sprites(box,c){
+  const s=st.Spr;
+  if(!box.dataset.i){box.dataset.i=1;
+   box.innerHTML='<div class="pvc"><label><input type="checkbox" data-k="out" checked> Contornos</label></div><div class="pvinfo" id="sObj"></div><canvas id="sPv" width="256" height="224" class="pvscr"></canvas><div class="pvinfo" id="sDet"></div><div class="pvh">Todos os 128 sprites (toque para selecionar)</div><div class="pvscroll sh"><canvas id="sSh" width="512" height="1024"></canvas></div><details><summary>Lista (OAM)</summary><pre id="sLst"></pre></details>';
+   box.onchange=e=>{if(e.target.dataset.k==="out"){s.out=e.target.checked;sprites(box,c)}};
+   box.querySelector("#sSh").onclick=e=>{const r=e.target.getBoundingClientRect();s.sel=Math.floor((e.clientY-r.top)/r.height*16)*8+Math.floor((e.clientX-r.left)/r.width*8);sprites(box,c)};
+   box.querySelector("#sPv").onclick=e=>{const r=e.target.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*256,py=(e.clientY-r.top)/r.height*224;
+    const L=getSpr(c);for(let i=0;i<128;i++){const q=L[i],y=q.y+q.h+1>256?q.y-255:q.y+1;if(px>=q.x&&px<q.x+q.w&&py>=y&&py<y+q.h){s.sel=i;break}}sprites(box,c)}}
+  loadPal(c.ppu.cgram);const L=getSpr(c),ob=pr(c,0x2101),vr=c.ppu.vram,q=sizes(ob>>5);
+  const yy=q=>q.y+q.h+1>256?q.y-255:q.y+1;
+  const P=canvas(256,224);fill(P,0xFF1E1E1E);for(let i=127;i>=0;i--){const q=L[i];drawSpr(P.buf,256,q.x,yy(q),q,ob,vr)}
+  P.ctx.putImageData(P.img,0,0);const pc=box.querySelector("#sPv"),px=pc.getContext("2d");px.putImageData(P.img,0,0);
+  const vis=q=>q.x+q.w>0&&q.x<256&&yy(q)+q.h>0&&yy(q)<224;
+  for(const q of L){const on=q.i===s.sel;if(!(on||s.out&&vis(q)))continue;px.strokeStyle=on?"#ff0":"rgba(80,160,255,.8)";px.lineWidth=on?2:1;px.strokeRect(q.x+.5,yy(q)+.5,q.w-1,q.h-1)}
+  const S=canvas(512,1024);fill(S,0xFF202020);for(const q of L)drawSpr(S.buf,512,(q.i&7)*64+((64-q.w)>>1),(q.i>>3)*64+((64-q.h)>>1),q,ob,vr);
+  const sc=box.querySelector("#sSh"),sx=sc.getContext("2d");sx.putImageData(S.img,0,0);sx.font="10px monospace";
+  for(const q of L){const X=(q.i&7)*64,Y=(q.i>>3)*64;sx.strokeStyle=q.i===s.sel?"#ff0":"#444";sx.lineWidth=q.i===s.sel?2:1;sx.strokeRect(X+.5,Y+.5,63,63);sx.fillStyle=vis(q)?"#8f8":"#888";sx.fillText(q.i,X+3,Y+11)}
+  const gap=(ob>>3&3);box.querySelector("#sObj").innerHTML="OBJSEL $"+H(ob,2)+" · tamanhos <b>"+q[0].join("×")+"</b> / <b>"+q[1].join("×")+"</b> · base tiles <b>$"+H((ob&7)<<13,4)+"</b> (palavra) · 2ª tabela +$"+H((gap+1)<<12,4);
+  const d=L[Math.max(0,Math.min(127,s.sel))],ad=tbyte(ob,d.nt,d.t)>>1;
+  box.querySelector("#sDet").innerHTML="<b>Sprite #"+d.i+"</b> · pos <b>X "+d.x+" Y "+d.y+"</b> · tamanho <b>"+d.w+"×"+d.h+"</b> ("+(d.big?"grande":"pequeno")+") · tile <b>$"+H(d.t,2)+"</b> · tabela "+d.nt+" · VRAM palavra <b>$"+H(ad,4)+"</b> · paleta <b>"+d.pal+"</b> (CGRAM "+(128+d.pal*16)+") · prioridade "+d.pri+" · flip "+(d.hf?"H":"-")+(d.vf?"V":"-");
+  box.querySelector("#sLst").textContent=L.map(q=>("00"+q.i).slice(-3)+" X"+String(q.x).padStart(4)+" Y"+String(q.y).padStart(4)+" T$"+H(q.t,2)+" P"+q.pal+" "+(q.w+"x"+q.h).padEnd(5)+" pr"+q.pri+" "+(q.hf?"H":"-")+(q.vf?"V":"-")+(vis(q)?"":"  (fora da tela)")).join("\n")}
+
+ /* ===== TILEMAP ===== */
+ const BPP=[[2,2,2,2],[4,4,2,0],[4,4,0,0],[8,4,0,0],[8,2,0,0],[4,2,0,0],[4,0,0,0],[8,0,0,0]];
+ function tilemap(box,c){
+  const s=st.Map;
+  if(!box.dataset.i){box.dataset.i=1;
+   box.innerHTML='<div class="pvc">BG:'+sel("bg",[[0,"BG1"],[1,"BG2"],[2,"BG3"],[3,"BG4"]],s.bg)+' <label><input type="checkbox" data-k="view" checked> Tela visível</label> <label><input type="checkbox" data-k="grid"> Grade</label></div><div class="pvinfo" id="mInfo"></div><div class="pvscroll mp"><canvas id="mCv"></canvas></div><div class="pvinfo" id="mSel">Toque num tile do mapa para ver a entrada.</div>';
+   box.onchange=e=>{const k=e.target.dataset.k;if(!k)return;s[k]=e.target.type==="checkbox"?e.target.checked:+e.target.value;s.sel=null;tilemap(box,c)};
+   box.querySelector("#mCv").onclick=e=>{const r=e.target.getBoundingClientRect();s.sel=[Math.floor((e.clientX-r.left)/r.width*e.target.width/s.tp),Math.floor((e.clientY-r.top)/r.height*e.target.height/s.tp)];tilemap(box,c)}}
+  const mode=pr(c,0x2105)&7,bg=s.bg,bpp=BPP[mode][bg],info=box.querySelector("#mInfo"),cv=box.querySelector("#mCv");
+  const sc=pr(c,0x2107+bg),mw=sc&1?64:32,mh=sc&2?64:32,mbase=(sc&0xFC)<<8,nb=pr(c,bg<2?0x210B:0x210C),cb=((bg&1?nb>>4:nb)&15)<<12;
+  const big=(pr(c,0x2105)>>(4+bg))&1,tp=big?16:8,hs=c.ppu.S[16+bg*2],vs=c.ppu.S[17+bg*2];s.tp=tp;
+  const bgm=pr(c,0x212C),en=(bgm>>bg)&1;
+  info.innerHTML="Modo <b>"+mode+"</b> · BG"+(bg+1)+" "+(bpp?"<b>"+bpp+"bpp</b>":"<b>desativado</b>")+" · "+(en?"ligado":"desligado em $212C")+" · mapa <b>$"+H(mbase,4)+"</b> ("+mw+"×"+mh+") · tiles <b>$"+H(cb,4)+"</b> · "+tp+"×"+tp+" · scroll H "+hs+" V "+vs;
+  if(!bpp||mode===7){cv.width=cv.height=8;cv.style.height="8px";info.innerHTML+=(mode===7?"<br>Modo 7 ainda não é exibido.":"<br>Este BG não existe no modo "+mode+".");return}
+  loadPal(c.ppu.cgram);const W=mw*tp*(tp===8?8:1)/(tp===8?1:1);const PW=mw*8*(big?2:1),PH=mh*8*(big?2:1);
+  cv.width=PW;cv.height=PH;cv.style.height="";const ctx=cv.getContext("2d"),img=ctx.createImageData(PW,PH),buf=new Uint32Array(img.data.buffer),t8=new Uint8Array(64),vr=c.ppu.vram,bt=bpp*8;
+  const bd=gray?0xFF000000:pal[0];buf.fill(bd);
+  const ent=(tx,ty)=>{const scr=(mw>32?tx>>5:0)+(mh>32?(ty>>5)*(mw>32?2:1):0),w=mbase+scr*0x400+(ty&31)*32+(tx&31),a=(w&0x7FFF)*2;return{w:w&0x7FFF,e:vr[a]|vr[a+1]<<8}};
+  const base=(p)=>bpp===8?0:bpp===2?(mode===0?bg*32:0)+p*4:p*16;
+  const mt=(bt,t)=>(cb*2+t*bt)&0xFFFF;
+  for(let ty=0;ty<mh;ty++)for(let tx=0;tx<mw;tx++){const {e}=ent(tx,ty),t=e&0x3FF,p=e>>10&7,hf=e>>14&1,vf=e>>15&1;
+   for(let sy=0;sy<(big?2:1);sy++)for(let sx=0;sx<(big?2:1);sx++){const ux=hf?(big?1-sx:0):sx,uy=vf?(big?1-sy:0):sy,tt=(t+(big?ux+uy*16:0))&0x3FF;
+    dec(vr,mt(bt,tt),bpp,t8);put(buf,PW,tx*tp+sx*8,ty*tp+sy*8,t8,bpp,base(p),hf,vf,true)}}
+  ctx.putImageData(img,0,0);
+  if(s.grid){ctx.strokeStyle="rgba(255,255,255,.25)";ctx.lineWidth=1;ctx.beginPath();for(let x=0;x<=mw;x++){ctx.moveTo(x*tp+.5,0);ctx.lineTo(x*tp+.5,PH)}for(let y=0;y<=mh;y++){ctx.moveTo(0,y*tp+.5);ctx.lineTo(PW,y*tp+.5)}ctx.stroke()}
+  if(s.view){ctx.strokeStyle="#ff0";ctx.lineWidth=2;for(const ox of[0,-PW])for(const oy of[0,-PH])ctx.strokeRect((hs%PW)+ox+1,(vs%PH)+oy+1,254,222)}
+  if(s.sel){const [x,y]=s.sel;if(x<mw&&y<mh){ctx.strokeStyle="#0ff";ctx.lineWidth=2;ctx.strokeRect(x*tp+1,y*tp+1,tp-2,tp-2);const {w,e}=ent(x,y);
+   box.querySelector("#mSel").innerHTML="Tile do mapa <b>("+x+","+y+")</b> · entrada VRAM palavra <b>$"+H(w,4)+"</b> = $"+H(e,4)+" · tile <b>$"+H(e&0x3FF,3)+"</b> (dados em palavra $"+H(mt(bt,e&0x3FF)>>1,4)+") · paleta "+(e>>10&7)+" · prioridade "+(e>>13&1)+" · flip "+(e>>14&1?"H":"-")+(e>>15&1?"V":"-")}}}
+
+ /* ===== REGISTROS ===== */
+ const lay=m=>["BG1","BG2","BG3","BG4","OBJ"].filter((_,i)=>m>>i&1).join(" ")||"—";
+ const sg=(v,n)=>v>>n&1;
+ const REG=[
+  [0x2100,"INIDISP",v=>(v&0x80?"<b>tela apagada (forced blank)</b>":"tela ligada")+" · brilho "+(v&15)],
+  [0x2101,"OBJSEL",v=>"tamanho "+(v>>5)+" · base $"+H((v&7)<<13,4)+" · gap +$"+H(((v>>3&3)+1)<<12,4)],
+  [0x2102,"OAMADDL",(v,c)=>"endereço OAM (byte) $"+H(c.ppu.S[2],3)],[0x2103,"OAMADDH",v=>"bit tabela alta "+(v&1)+" · prioridade rotação "+sg(v,7)],
+  [0x2104,"OAMDATA",()=>"escrita em OAM"],
+  [0x2105,"BGMODE",v=>"modo <b>"+(v&7)+"</b> · BG3 prio "+sg(v,3)+" · tiles 16×16: "+([0,1,2,3].filter(i=>v>>(4+i)&1).map(i=>"BG"+(i+1)).join(" ")||"nenhum")],
+  [0x2106,"MOSAIC",v=>"tamanho "+(v>>4)+" · BGs "+lay(v&15)],
+  [0x2107,"BG1SC",v=>"mapa $"+H((v&0xFC)<<8,4)+" · "+["32×32","64×32","32×64","64×64"][v&3]],[0x2108,"BG2SC",v=>"mapa $"+H((v&0xFC)<<8,4)+" · "+["32×32","64×32","32×64","64×64"][v&3]],
+  [0x2109,"BG3SC",v=>"mapa $"+H((v&0xFC)<<8,4)+" · "+["32×32","64×32","32×64","64×64"][v&3]],[0x210A,"BG4SC",v=>"mapa $"+H((v&0xFC)<<8,4)+" · "+["32×32","64×32","32×64","64×64"][v&3]],
+  [0x210B,"BG12NBA",v=>"BG1 tiles $"+H((v&15)<<12,4)+" · BG2 tiles $"+H((v>>4)<<12,4)],[0x210C,"BG34NBA",v=>"BG3 tiles $"+H((v&15)<<12,4)+" · BG4 tiles $"+H((v>>4)<<12,4)],
+  [0x210D,"BG1HOFS",(v,c)=>"scroll "+c.ppu.S[16]],[0x210E,"BG1VOFS",(v,c)=>"scroll "+c.ppu.S[17]],[0x210F,"BG2HOFS",(v,c)=>"scroll "+c.ppu.S[18]],[0x2110,"BG2VOFS",(v,c)=>"scroll "+c.ppu.S[19]],
+  [0x2111,"BG3HOFS",(v,c)=>"scroll "+c.ppu.S[20]],[0x2112,"BG3VOFS",(v,c)=>"scroll "+c.ppu.S[21]],[0x2113,"BG4HOFS",(v,c)=>"scroll "+c.ppu.S[22]],[0x2114,"BG4VOFS",(v,c)=>"scroll "+c.ppu.S[23]],
+  [0x2115,"VMAIN",v=>"incremento "+[1,32,128,128][v&3]+" · após "+(v&0x80?"byte alto ($2119)":"byte baixo ($2118)")],
+  [0x2116,"VMADDL",(v,c)=>"endereço VRAM (palavra) <b>$"+H(c.ppu.S[0],4)+"</b>"],[0x2117,"VMADDH",()=>""],
+  [0x211A,"M7SEL",()=>"modo 7"],[0x211B,"M7A",()=>""],[0x211C,"M7B",()=>""],[0x211D,"M7C",()=>""],[0x211E,"M7D",()=>""],[0x211F,"M7X",()=>""],[0x2120,"M7Y",()=>""],
+  [0x2121,"CGADD",v=>"cor inicial "+v+" (CGRAM $"+H(v*2,3)+")"],[0x2122,"CGDATA",()=>"escrita em CGRAM"],
+  [0x2123,"W12SEL",()=>"janelas BG1/BG2"],[0x2124,"W34SEL",()=>"janelas BG3/BG4"],[0x2125,"WOBJSEL",()=>"janelas OBJ/cor"],
+  [0x2126,"WH0",v=>"janela 1 esquerda "+v],[0x2127,"WH1",v=>"janela 1 direita "+v],[0x2128,"WH2",v=>"janela 2 esquerda "+v],[0x2129,"WH3",v=>"janela 2 direita "+v],
+  [0x212A,"WBGLOG",()=>"lógica das janelas BG"],[0x212B,"WOBJLOG",()=>"lógica das janelas OBJ/cor"],
+  [0x212C,"TM",v=>"tela principal: "+lay(v)],[0x212D,"TS",v=>"sub-tela: "+lay(v)],[0x212E,"TMW",v=>"janela na principal: "+lay(v)],[0x212F,"TSW",v=>"janela na sub-tela: "+lay(v)],
+  [0x2130,"CGWSEL",v=>"clip "+(v>>6)+" · prevenir "+(v>>4&3)+" · sub-tela "+sg(v,1)+" · direta "+sg(v,0)],
+  [0x2131,"CGADSUB",v=>(v&0x80?"subtrair":"somar")+" · metade "+sg(v,6)+" · camadas "+lay(v&0x3F&0x1F|(v&0x20?16:0))],
+  [0x2132,"COLDATA",v=>"cor fixa "+(v&31)+" · canais "+[v&0x20?"R":"",v&0x40?"G":"",v&0x80?"B":""].join("")],
+  [0x2133,"SETINI",v=>"interlace "+sg(v,0)+" · OBJ interlace "+sg(v,1)+" · 239 linhas "+sg(v,2)+" · pseudo-hires "+sg(v,3)+" · EXTBG "+sg(v,6)],
+  [0x4200,"NMITIMEN",v=>"NMI "+sg(v,7)+" · IRQ V/H "+(v>>4&3)+" · joypad auto "+sg(v,0)],
+  [0x420B,"MDMAEN",v=>"último DMA canais: "+([0,1,2,3,4,5,6,7].filter(i=>v>>i&1).join(",")||"—")],
+  [0x420C,"HDMAEN",v=>"HDMA canais: "+([0,1,2,3,4,5,6,7].filter(i=>v>>i&1).join(",")||"—")],
+  [0x420D,"MEMSEL",v=>"ROM rápida "+sg(v,0)]];
+ let prevR=null;
+ function regs(box,c){
+  if(!box.dataset.i){box.dataset.i=1;box.innerHTML='<div class="pvc"><label><input type="checkbox" id="rOnly" checked> Só registradores já escritos</label></div><div id="rTab"></div>';box.querySelector("#rOnly").onchange=()=>{box.dataset.k="";regs(box,c)};prevR=null}
+  const only=box.querySelector("#rOnly").checked,cur={};let h="";
+  for(const [a,n,f] of REG){const raw=a<0x4000?c.ppu.pr[a-0x2100]:c.io[a-0x2000],wr=a<0x4000?c.iolog.some(x=>x[0]===a)||c.io[a-0x2000]!==0||raw!==0:true;
+   cur[a]=raw;const hit=raw!==0||(c.iolog.some(x=>(x[0]&0xFFFF)===a));if(only&&!hit)continue;
+   const ch=prevR&&prevR[a]!==raw;h+='<div class="rr'+(ch?" chg":"")+'"><span class="ra">$'+H(a,4)+'</span><span class="rn">'+n+'</span><b class="rv">'+H(raw,2)+'</b><span class="rd">'+(f(raw,c)||"")+"</span></div>"}
+  prevR=cur;box.querySelector("#rTab").innerHTML=h||"<i>Nenhum registrador da PPU escrito ainda. Avance a execução.</i>"}
+
+ return{render(v,box,c){({Til:tiles,Spr:sprites,Map:tilemap,Ppu:regs}[v])(box,c)},reset(){for(const k of ["Til","Spr","Map"])st[k].sel=k==="Spr"?0:k==="Til"?-1:null;prevR=null}}
+})();
 /* ---------- DEBUGGER: roda a ROM compilada passo a passo (CPU 65816) ---------- */
 (function(){
  const pane=document.createElement("div");pane.id="dbgpane";pane.hidden=true;
@@ -846,6 +1033,7 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
   <button class="mini" id="d_run" type="button">▶▶ Executar</button>
   <span id="d_info"></span></div>
   <div id="d_next"></div>
+  <div id="vwDbg">
   <div id="d_src" aria-label="Código em execução"></div>
   <div class="dregs" id="d_regs"></div>
   <div class="dflags" id="d_flags"></div>
@@ -853,11 +1041,12 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
    <button class="mini" id="d_wram" type="button">WRAM $7E0000</button><button class="mini" id="d_pc" type="button">No PC</button><button class="mini" id="d_sp" type="button">Pilha</button></div>
   <pre id="d_mem"></pre>
   <div class="dhead">Escritas em registradores ($2100-$5FFF)</div>
-  <pre id="d_io"></pre>
+  <pre id="d_io"></pre></div>
+  <div class="vw" id="vwSpr" hidden></div><div class="vw" id="vwMap" hidden></div><div class="vw" id="vwTil" hidden></div><div class="vw" id="vwPpu" hidden></div>
   <div id="d_stop"></div>`;
  $("#cmhost").after(pane);
  const $d=id=>document.getElementById(id);
- let cpu=null,dbgInfo=null,lineAt=new Map(),fileLines={},bps=new Set(),running=0,prev=null,prevMem=null,on=false,mapName="lorom",memBase=0;
+ let cpu=null,dbgInfo=null,lineAt=new Map(),fileLines={},bps=new Set(),running=0,prev=null,prevMem=null,on=false,mapName="lorom",memBase=0,view="Dbg",lastRef=0;
  const H=(n,d)=>hx(n,d);
  /* lê o arquivo .dbg gerado pelo ld65 */
  function parseDbg(txt){
@@ -881,6 +1070,9 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
   const pc=cur24(),loc=lineAt.get(pc),dis=cpu.dis(pc);
   $d("d_info").textContent="passo "+cpu.steps+" · "+cpu.hist.length+" p/ voltar";
   $d("d_next").innerHTML="<b>Próxima:</b> <code>"+H(cpu.pb,2)+":"+H(cpu.pc,4)+"</code> <span class=\"dis\">"+esc(dis.text)+"</span>"+(loc?" <small>("+esc(loc.file)+":"+loc.line+")</small>":"");
+  $d("d_stop").textContent=cpu.stop||"";$d("d_stop").hidden=!cpu.stop;
+  $d("d_back").disabled=!cpu.hist.length;$d("d_step").disabled=cpu.halted;
+  if(view!=="Dbg"){const b=$d("vw"+view);try{PPUV.render(view,b,cpu)}catch(e){b.innerHTML="<pre>Erro no visor: "+esc(String(e&&e.stack||e))+"</pre>"}return}
   /* código-fonte */
   const box=$d("d_src");let html="";
   const sl=loc&&srcLines(loc.file);
@@ -921,21 +1113,30 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
   const loop=()=>{if(!running)return;let n=0;
    while(n++<3000&&!cpu.halted){cpu.step();const l=lineAt.get(cur24());if(l&&bps.size&&bps.has((srcLines(l.file)||{}).name+":"+l.line)){stop();render();return}}
    if(cpu.halted){stop();render();return}
-   $d("d_info").textContent="executando… passo "+cpu.steps;requestAnimationFrame(loop)};
+   $d("d_info").textContent="executando… passo "+cpu.steps;
+   if(view!=="Dbg"&&performance.now()-lastRef>300){lastRef=performance.now();try{PPUV.render(view,$d("vw"+view),cpu)}catch(e){}}
+   requestAnimationFrame(loop)};
   requestAnimationFrame(loop)}
  $d("d_src").addEventListener("click",e=>{const r=e.target.closest(".sl");if(!r||!r.dataset.l)return;if(!e.target.closest(".n"))return;const k=r.dataset.f+":"+r.dataset.l;if(bps.has(k))bps.delete(k);else bps.add(k);r.classList.toggle("bp")});
- /* ligar/desligar */
- async function dbgOn(){
-  const btn=$("#dbgbtn");btn.disabled=true;btn.textContent="Compilando…";
-  await build();btn.disabled=false;btn.textContent="Debugger";
+ /* ligar/desligar + abas de visão */
+ const BTN={Dbg:"#dbgbtn",Spr:"#vSpr",Map:"#vMap",Til:"#vTil",Ppu:"#vPpu"};
+ function setView(v){view=v;
+  for(const k in BTN){const b=$(BTN[k]);if(b)b.setAttribute("aria-pressed",String(on&&k===v))}
+  $d("vwDbg").hidden=v!=="Dbg";for(const k of["Spr","Map","Til","Ppu"])$d("vw"+k).hidden=v!==k;
+  $d("d_src").hidden=false;if(cpu)render()}
+ async function dbgOn(v){
+  const btn=$(BTN[v]);const txt=btn.textContent;btn.disabled=true;btn.textContent="Compilando…";
+  await build();btn.disabled=false;btn.textContent=txt;
   if(!rom){log("O debugger precisa de uma ROM compilada sem erros.","e");return false}
   fileLines={};lineAt=dbgFile?parseDbg(dec.decode(dbgFile)):new Map();
   mapName=detectMap(rom);cpu=SnesCPU(rom,mapName);cpu.reset();prev=null;prevMem=null;
-  on=true;btn.setAttribute("aria-pressed","true");
+  for(const k of["Spr","Map","Til","Ppu"]){const b=$d("vw"+k);b.innerHTML="";delete b.dataset.i;delete b.dataset.r}
+  if(window.PPUV)PPUV.reset();
+  on=true;
   $("#cmhost").hidden=true;$("#findbar").hidden=true;$("#bin").hidden=true;pane.hidden=false;
-  log("Debugger: ROM "+mapName.toUpperCase()+", início em "+H(cpu.pb,2)+":"+H(cpu.pc,4)+(lineAt.size?"":" (sem informação de linhas)"),"m");render();return true}
- window.dbgOff=function(){if(!on)return;stop();on=false;$("#dbgbtn").setAttribute("aria-pressed","false");pane.hidden=true;showCur();try{cm.refresh()}catch(e){}};
- $("#dbgbtn").onclick=()=>{on?dbgOff():dbgOn()};
+  log("Debugger: ROM "+mapName.toUpperCase()+", início em "+H(cpu.pb,2)+":"+H(cpu.pc,4)+(lineAt.size?"":" (sem informação de linhas)"),"m");setView(v);return true}
+ window.dbgOff=function(){if(!on)return;stop();on=false;setView(view);pane.hidden=true;showCur();try{cm.refresh()}catch(e){}};
+ for(const k in BTN){const b=$(BTN[k]);if(b)b.onclick=()=>{if(on&&view===k)dbgOff();else if(on)setView(k);else dbgOn(k)}}
 })();
 /* ---------- download ---------- */
 const BR=()=>window.SnesBridge||null;
