@@ -179,6 +179,40 @@ header h1 small{font-weight:400}
 </style>
 </head>
 <body>
+<div id="splash" hidden><svg id="spLogo" width="200" viewBox="90 104 195 106" role="img" aria-label="Controle de SNES"><g>
+<rect x="108" y="110" width="54" height="17" fill="#0F0A20"/><rect x="113" y="115" width="44" height="9" fill="#7A7A94"/>
+<rect x="218" y="110" width="54" height="17" fill="#0F0A20"/><rect x="223" y="115" width="44" height="9" fill="#7A7A94"/>
+<rect x="95" y="135" width="190" height="60" fill="#0F0A20"/><rect x="105" y="125" width="170" height="80" fill="#0F0A20"/>
+<rect x="105" y="145" width="170" height="40" fill="#C9C9D9"/><rect x="115" y="135" width="150" height="60" fill="#C9C9D9"/>
+<rect x="115" y="185" width="150" height="10" fill="#A0A0B8"/>
+<rect x="120" y="157" width="40" height="16" fill="#0F0A20"/><rect x="132" y="145" width="16" height="40" fill="#0F0A20"/>
+<rect x="122" y="159" width="36" height="12" fill="#4A4A66"/><rect x="134" y="147" width="12" height="36" fill="#4A4A66"/>
+<rect x="137" y="162" width="6" height="6" fill="#2A2A40"/>
+<rect x="172" y="172" width="14" height="5" fill="#6B6B85"/><rect x="194" y="172" width="14" height="5" fill="#6B6B85"/>
+<rect x="233" y="140" width="14" height="14" fill="#3B6FE0" stroke="#0F0A20" stroke-width="2"/>
+<rect x="215" y="158" width="14" height="14" fill="#35B26A" stroke="#0F0A20" stroke-width="2"/>
+<rect x="233" y="176" width="14" height="14" fill="#F2C230" stroke="#0F0A20" stroke-width="2"/>
+<rect x="251" y="158" width="14" height="14" fill="#E0453B" stroke="#0F0A20" stroke-width="2"/></g></svg>
+<div class="spT"><svg id="spT1" height="30"></svg><svg id="spT2" height="18"></svg><svg id="spT3" height="18"></svg></div>
+<div class="spBar"><i></i><i></i><i></i><i></i><i class="o"></i><i class="o"></i><i class="o"></i></div></div>
+<style>#splash{position:fixed;inset:0;z-index:99999;background:#25222B;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transition:opacity .45s}
+#splash[hidden]{display:none}#splash.out{opacity:0}
+#splash .spT{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}#splash svg{image-rendering:pixelated;shape-rendering:crispEdges;max-width:90vw}
+#splash .spBar{display:flex;gap:4px}#splash .spBar i{width:14px;height:10px;background:#3A3458}#splash .spBar i.on{background:#E0457B}
+#spLogo{animation:spUp .5s ease-out}@keyframes spUp{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}</style>
+<script>(function(){
+ if(!window.SnesBridge)return;
+ const F={P:"11110100011000111110100001000010000",R:"11110100011000111110101001001010001",O:"01110100011000110001100011000101110",T:"11111001000010000100001000010000100",E:"11111100001000011110100001000011111",U:"10001100011000110001100011000101110",S:"01111100001000001110000010000111110",N:"10001110011010110011100011000110001",G:"01110100011000010111100011000101110",A:"01110100011000111111100011000110001",M:"10001110111010110101100011000110001",I:"11111001000010000100001000010011111"};
+ const COL={1:"#FFD84D",2:"#A99DFF",3:"#A99DFF"};
+ function txt(id,s,c,sz){const e=document.getElementById(id);let x=0,h="";for(const ch of s){const g=F[ch];if(g){for(let i=0;i<35;i++)if(g[i]==="1")h+='<rect x="'+(x+i%5)+'" y="'+(i/5|0)+'" width="1" height="1" fill="'+c+'"/>'}x+=6}
+  e.setAttribute("viewBox","0 0 "+(x-1)+" 7");e.setAttribute("width",(x-1)*sz);e.setAttribute("height",7*sz);e.innerHTML=h}
+ const sp=document.getElementById("splash");
+ txt("spT1","PROTEUS","#FFD84D",5);txt("spT2","SNES","#A99DFF",3);txt("spT3","PROGRAMMING","#A99DFF",3);
+ sp.hidden=false;const b=[...sp.querySelectorAll(".spBar i")];let n=4;
+ const t=setInterval(()=>{if(n<b.length){b[n].className="on";n++}},230);
+ setTimeout(()=>{clearInterval(t);sp.classList.add("out");setTimeout(()=>sp.remove(),500)},1900);
+})();</script>
+
 <main>
 <header><h1><img class="logo" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAC30lEQVR4nO2ZwWsTQRTGP0MvBQlB6KkQ4jZ60FsP3qoXlepFyMWSS48rSCgUEfwLvJRACIWuNy9BQYoiiCR4aHorGPBgD3XThmBAKMgSCl6K9SCzzk5mZieb7bqQ9zvNTGY387335r2dXYAgCIIgCIIgCIIgCIKYLi6YTqxubJ2Zzl1/8sj4vv+b0IUy4Xfu3jS+aavZBgC87eQiLuv8aDdWApq1BqhubJ2NI1yk1WynxgiicMbIIB/qOvG2XfHbjlNXzmPRkNZtoTSASjwTnru27o95+1UAakO0mm28/J2dcKnhfHlaHtvIGb7DQj4s7Hnxsj5P1+3DsgpYzQyxmhmOuz5joogHuAgw2e+2XVGK7R98RvZ0RxoFXbfvtw8Pe6naDjNJ/MlCMR8wwv1XD4xLalx8WHknNXoGMM/2jlP39zuPzvsillXA7e/3QufFiUo8IOSAaSR0C7Csz3vX269iOHPL72dPd0KvWSjmAfzLBzqvJInSAH65W7sY6DNRsucANtbALwBAWWIIxvB1PtY8kH3Yj2RQbQQw8azt1U78vmq/M/GsXcZslHWNRVTxgMQAoud5vMVj2HZFKt62KwHxjNLAlV4zyaLjJJEyKGO4djmxUpitHZlXAcep/y13XLgDQG/3CLnOnDL0Hac+Eu5vBgNszxeNyuN5oRMPhESAVzuBt3gMAMh15gK/qQ5DZcyiNHABANvzxcgLSwqlAcTMLvY/Pvvmz11WzNF5/me5GNsWuNRw40uCIjIRvHjWX35+RXsN/ygcF5MIZ0z9k+DYp0HR+4z3n35gc29JGfYsAqbyNCiGf+/q9cRKYOHgq9bYgR+jRoHO+7znAaD0IrmSGCYeCHkl1nX7/iGGwTL84xu7/tjm3hKA0eSX1rDnUW6BVrMNyyqMGEF3GOIRPZ9WQl+LW1bB74vRICPNr79kGH8Y4Q0RBvN62sUD9GmMIAiCIAiCIAiCIAiCmDr+AACOTJn8irDuAAAAAElFTkSuQmCC"><span>PROTEUS SNES PROGRAMMING</span><small>ca65 + ld65 no navegador</small></h1>
 <div class="bar"><button class="btn mini" id="theme" type="button">Tema</button></div></header>
@@ -517,7 +551,7 @@ function SnesCPU(rom,map){
    wr(dst<<16|c.y,rd(src<<16|c.x));c.x=(c.x+d)&(XW===2?0xFFFF:0xFF);c.y=(c.y+d)&(XW===2?0xFFFF:0xFF);c.a=(c.a-1)&0xFFFF;
    if(c.a!==0xFFFF)c.pc=(c.pc-3)&0xFFFF;break}
   case"WDM":f8();break;case"NOP":break;
-  case"WAI":c.waiting=true;c.stop="WAI: esperando interrupção (o simulador não gera NMI)";c.halted=true;break;
+  case"WAI":if(c.io[0x2200]&0x80){interrupt(0xFFEA,0xFFFA);c.nmis=(c.nmis||0)+1}else{c.waiting=true;c.stop="WAI: o programa espera uma interrupção, mas o NMI está desligado (bit 7 de $4200 = 0). Ligue com  lda #$80 / sta $4200  para o simulador disparar o NMI no WAI.";c.halted=true}break;
   case"STP":c.stop="STP: processador parado";c.halted=true;break;
   default:c.stop="Instrução não suportada: "+mn;c.halted=true}
   return true};
