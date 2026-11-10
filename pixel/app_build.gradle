@@ -1,0 +1,30 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'br.snesbuild'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "br.proteus.pixelsprite"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // o index.html já traz o compilador em WebAssembly embutido; não comprimir nada
+    androidResources {
+        noCompress 'html'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
+}

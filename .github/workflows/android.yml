@@ -2,6 +2,7 @@ name: Gerar APK
 on:
   push:
     branches: [ main, master ]
+    paths-ignore: [ 'pixel/**' ]
   workflow_dispatch:
 permissions:
   contents: write

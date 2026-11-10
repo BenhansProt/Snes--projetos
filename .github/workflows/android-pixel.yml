@@ -1,0 +1,47 @@
+name: Gerar APK Pixel
+on:
+  push:
+    branches: [ main, master ]
+    paths: [ 'pixel/**', '.github/workflows/android-pixel.yml' ]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pixel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Organizar pastas
+        run: |
+          mkdir -p app/src/main/java/br/snesbuild app/src/main/assets app/src/main/res/xml
+          mv app_build.gradle app/build.gradle
+          mv AndroidManifest.xml app/src/main/AndroidManifest.xml
+          mv MainActivity.java app/src/main/java/br/snesbuild/MainActivity.java
+          mv file_paths.xml app/src/main/res/xml/file_paths.xml
+          mv index.html app/src/main/assets/index.html
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p app/src/main/res/mipmap-$d; mv ic_$d.png app/src/main/res/mipmap-$d/ic_launcher.png; done
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Aceitar licenças do Android SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Compilar
+        run: gradle assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PixelSprite-apk
+          path: pixel/app/build/outputs/apk/debug/app-debug.apk
+      - name: Publicar o APK em Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk PixelSprite.apk
+          gh release delete apk-pixel --yes --cleanup-tag || true
+          gh release create apk-pixel PixelSprite.apk --title "Proteus Pixel & Sprite (APK)" --notes "APK mais recente. Baixe PixelSprite.apk e instale."
