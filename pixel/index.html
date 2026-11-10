@@ -19,7 +19,9 @@
    var n=wrap.nextSibling;while(n&&!(n.nodeType===1&&n.matches&&n.matches("h2.lbl"))){var nx=n.nextSibling;wrap.appendChild(n);n=nx}
    var shut=idx>1;wrap.hidden=shut;h.classList.toggle("shut",shut);
    h.addEventListener("click",function(){var s=!wrap.hidden;wrap.hidden=s;h.classList.toggle("shut",s);try{window.dispatchEvent(new Event("resize"))}catch(e){}})})}
- var iv=setInterval(function(){if(document.querySelector("#pane-spr h2.lbl")){accordion();clearInterval(iv)}},200);setTimeout(function(){clearInterval(iv)},8000);
+ /* botão de exportar sempre à vista no topo da aba Sprites */
+ function expBar(){var pane=document.getElementById('pane-spr');if(!pane||document.getElementById('expBar'))return;var b=document.createElement('div');b.id='expBar';b.innerHTML='<button type="button" class="btn pri" id="expChrPal">⬇ Exportar SPRITE.CHR + SPRITE.PAL</button>';pane.insertBefore(b,pane.firstChild);document.getElementById('expChrPal').addEventListener('click',function(){var o=document.getElementById('sprSaveSet');if(o)o.click()})}
+ var iv=setInterval(function(){if(document.querySelector("#pane-spr h2.lbl")){accordion();expBar();clearInterval(iv)}},200);setTimeout(function(){clearInterval(iv)},8000);
 
  /* 3) escolher imagens pelo seletor nativo do Android (o seletor do WebView falha dentro do quadro Pixel) */
  window.__natTarget="";
@@ -225,6 +227,9 @@ canvas.px,#sprCv,#sprSheet,#tileCv{touch-action:none;-webkit-touch-callout:none;
 
 #pane-spr .hint:not(#shHint){display:none}
 #pane-spr .hoverline{display:none}
+
+#expBar{padding:0 0 8px}
+#expBar .btn{width:100%;min-height:46px;font-weight:700;background:#5547a3;color:#fff;border-color:#5547a3}
 
 </style>
 
