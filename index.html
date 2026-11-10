@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>SNES Build</title>
+<title>PROTEUS SNES PROGRAMMING</title>
 <style>
 .CodeMirror{font-family:monospace;height:300px;color:#000;direction:ltr}.CodeMirror-lines{padding:4px 0}.CodeMirror pre.CodeMirror-line,.CodeMirror pre.CodeMirror-line-like{padding:0 4px}.CodeMirror-gutter-filler,.CodeMirror-scrollbar-filler{background-color:#fff}.CodeMirror-gutters{border-right:1px solid #ddd;background-color:#f7f7f7;white-space:nowrap}.CodeMirror-linenumber{padding:0 3px 0 5px;min-width:20px;text-align:right;color:#999;white-space:nowrap}.CodeMirror-guttermarker{color:#000}.CodeMirror-guttermarker-subtle{color:#999}.CodeMirror-cursor{border-left:1px solid #000;border-right:none;width:0}.CodeMirror div.CodeMirror-secondarycursor{border-left:1px solid silver}.cm-fat-cursor .CodeMirror-cursor{width:auto;border:0!important;background:#7e7}.cm-fat-cursor div.CodeMirror-cursors{z-index:1}.cm-fat-cursor .CodeMirror-line::selection,.cm-fat-cursor .CodeMirror-line>span::selection,.cm-fat-cursor .CodeMirror-line>span>span::selection{background:0 0}.cm-fat-cursor .CodeMirror-line::-moz-selection,.cm-fat-cursor .CodeMirror-line>span::-moz-selection,.cm-fat-cursor .CodeMirror-line>span>span::-moz-selection{background:0 0}.cm-fat-cursor{caret-color:transparent}@-moz-keyframes blink{50%{background-color:transparent}}@-webkit-keyframes blink{50%{background-color:transparent}}@keyframes blink{50%{background-color:transparent}}.cm-tab{display:inline-block;text-decoration:inherit}.CodeMirror-rulers{position:absolute;left:0;right:0;top:-50px;bottom:0;overflow:hidden}.CodeMirror-ruler{border-left:1px solid #ccc;top:0;bottom:0;position:absolute}.cm-s-default .cm-header{color:#00f}.cm-s-default .cm-quote{color:#090}.cm-negative{color:#d44}.cm-positive{color:#292}.cm-header,.cm-strong{font-weight:700}.cm-em{font-style:italic}.cm-link{text-decoration:underline}.cm-strikethrough{text-decoration:line-through}.cm-s-default .cm-keyword{color:#708}.cm-s-default .cm-atom{color:#219}.cm-s-default .cm-number{color:#164}.cm-s-default .cm-def{color:#00f}.cm-s-default .cm-variable-2{color:#05a}.cm-s-default .cm-type,.cm-s-default .cm-variable-3{color:#085}.cm-s-default .cm-comment{color:#a50}.cm-s-default .cm-string{color:#a11}.cm-s-default .cm-string-2{color:#f50}.cm-s-default .cm-meta{color:#555}.cm-s-default .cm-qualifier{color:#555}.cm-s-default .cm-builtin{color:#30a}.cm-s-default .cm-bracket{color:#997}.cm-s-default .cm-tag{color:#170}.cm-s-default .cm-attribute{color:#00c}.cm-s-default .cm-hr{color:#999}.cm-s-default .cm-link{color:#00c}.cm-s-default .cm-error{color:red}.cm-invalidchar{color:red}.CodeMirror-composing{border-bottom:2px solid}div.CodeMirror span.CodeMirror-matchingbracket{color:#0b0}div.CodeMirror span.CodeMirror-nonmatchingbracket{color:#a22}.CodeMirror-matchingtag{background:rgba(255,150,0,.3)}.CodeMirror-activeline-background{background:#e8f2ff}.CodeMirror{position:relative;overflow:hidden;background:#fff}.CodeMirror-scroll{overflow:scroll!important;margin-bottom:-50px;margin-right:-50px;padding-bottom:50px;height:100%;outline:0;position:relative;z-index:0}.CodeMirror-sizer{position:relative;border-right:50px solid transparent}.CodeMirror-gutter-filler,.CodeMirror-hscrollbar,.CodeMirror-scrollbar-filler,.CodeMirror-vscrollbar{position:absolute;z-index:6;display:none;outline:0}.CodeMirror-vscrollbar{right:0;top:0;overflow-x:hidden;overflow-y:scroll}.CodeMirror-hscrollbar{bottom:0;left:0;overflow-y:hidden;overflow-x:scroll}.CodeMirror-scrollbar-filler{right:0;bottom:0}.CodeMirror-gutter-filler{left:0;bottom:0}.CodeMirror-gutters{position:absolute;left:0;top:0;min-height:100%;z-index:3}.CodeMirror-gutter{white-space:normal;height:100%;display:inline-block;vertical-align:top;margin-bottom:-50px}.CodeMirror-gutter-wrapper{position:absolute;z-index:4;background:0 0!important;border:none!important}.CodeMirror-gutter-background{position:absolute;top:0;bottom:0;z-index:4}.CodeMirror-gutter-elt{position:absolute;cursor:default;z-index:4}.CodeMirror-gutter-wrapper ::selection{background-color:transparent}.CodeMirror-gutter-wrapper ::-moz-selection{background-color:transparent}.CodeMirror-lines{cursor:text;min-height:1px}.CodeMirror pre.CodeMirror-line,.CodeMirror pre.CodeMirror-line-like{-moz-border-radius:0;-webkit-border-radius:0;border-radius:0;border-width:0;background:0 0;font-family:inherit;font-size:inherit;margin:0;white-space:pre;word-wrap:normal;line-height:inherit;color:inherit;z-index:2;position:relative;overflow:visible;-webkit-tap-highlight-color:transparent;-webkit-font-variant-ligatures:contextual;font-variant-ligatures:contextual}.CodeMirror-wrap pre.CodeMirror-line,.CodeMirror-wrap pre.CodeMirror-line-like{word-wrap:break-word;white-space:pre-wrap;word-break:normal}.CodeMirror-linebackground{position:absolute;left:0;right:0;top:0;bottom:0;z-index:0}.CodeMirror-linewidget{position:relative;z-index:2;padding:.1px}.CodeMirror-rtl pre{direction:rtl}.CodeMirror-code{outline:0}.CodeMirror-gutter,.CodeMirror-gutters,.CodeMirror-linenumber,.CodeMirror-scroll,.CodeMirror-sizer{-moz-box-sizing:content-box;box-sizing:content-box}.CodeMirror-measure{position:absolute;width:100%;height:0;overflow:hidden;visibility:hidden}.CodeMirror-cursor{position:absolute;pointer-events:none}.CodeMirror-measure pre{position:static}div.CodeMirror-cursors{visibility:hidden;position:relative;z-index:3}div.CodeMirror-dragcursors{visibility:visible}.CodeMirror-focused div.CodeMirror-cursors{visibility:visible}.CodeMirror-selected{background:#d9d9d9}.CodeMirror-focused .CodeMirror-selected{background:#d7d4f0}.CodeMirror-crosshair{cursor:crosshair}.CodeMirror-line::selection,.CodeMirror-line>span::selection,.CodeMirror-line>span>span::selection{background:#d7d4f0}.CodeMirror-line::-moz-selection,.CodeMirror-line>span::-moz-selection,.CodeMirror-line>span>span::-moz-selection{background:#d7d4f0}.cm-searching{background-color:#ffa;background-color:rgba(255,255,0,.4)}.cm-force-border{padding-right:.1px}@media print{.CodeMirror div.CodeMirror-cursors{visibility:hidden}}.cm-tab-wrap-hack:after{content:''}span.CodeMirror-selectedtext{background:0 0}
 
@@ -122,11 +122,47 @@ label.c{display:flex;gap:8px;align-items:center;font-size:13.5px}
 .inl input{flex:1 1 160px;min-width:0;border:1px solid var(--line);background:var(--code);border-radius:7px;padding:8px 9px;font:13px var(--mono)}
 footer{color:var(--mut);font-size:12px}
 [hidden]{display:none!important}
+header h1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header h1 .logo{width:34px;height:34px;image-rendering:pixelated;border-radius:6px;flex:none}
+header h1 small{font-weight:400}
+#dbgbtn[aria-pressed="true"]{background:#2a62d9;color:#fff;border-color:#2a62d9}
+#dbgpane{padding:10px;display:flex;flex-direction:column;gap:10px;font:13px var(--mono);min-height:430px}
+#dbgpane[hidden]{display:none}
+#dbgpane .dbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#dbgpane .dbar .pri{background:#2a62d9;color:#fff;border-color:#2a62d9}
+#dbgpane .dbar button:disabled{opacity:.45}
+#d_info{color:var(--mut);font-size:12px}
+#d_next{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--code)}
+#d_next .dis{font-weight:700;color:var(--fg)}
+#d_src{height:230px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--code);-webkit-overflow-scrolling:touch;position:relative}
+#d_src .sl{display:flex;min-height:20px;line-height:20px;white-space:pre;tab-size:4}
+#d_src .sl .n{flex:none;width:44px;text-align:right;padding-right:8px;color:var(--mut);cursor:pointer;user-select:none}
+#d_src .sl.cur{background:rgba(66,133,244,.30)}
+#d_src .sl.cur .n{color:var(--fg);font-weight:700}
+#d_src .sl.bp .n{background:#d33;color:#fff}
+#d_src .sl.note{color:var(--mut);font-size:12px}
+.dregs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dflags{display:grid;grid-template-columns:repeat(9,1fr);gap:6px}
+.reg,.fl{border:1px solid var(--line);border-radius:8px;background:var(--code);padding:5px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.fl{flex-direction:column;align-items:center;padding:4px 0;gap:0}
+.reg i,.fl i{font-style:normal;color:var(--mut);font-size:11px}
+.reg b,.fl b{font-size:15px}
+.reg.chg,.fl.chg{background:rgba(255,170,0,.28);border-color:#e69500}
+.dmem{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.dmem label{display:flex;align-items:center;gap:4px;color:var(--mut)}
+.dmem input{width:78px;font:inherit;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--code);color:var(--fg);text-transform:uppercase}
+#d_mem,#d_io{margin:0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--code);overflow:auto;font-size:12px;line-height:1.5;white-space:pre}
+#d_mem b{color:var(--mut);font-weight:400}
+#d_mem mark{background:rgba(255,170,0,.45);color:inherit}
+.dhead{color:var(--mut);font-size:12px}
+#d_stop{padding:7px 10px;border-radius:8px;background:rgba(221,51,51,.16);border:1px solid #d33}
+@media(max-width:560px){.dregs{grid-template-columns:repeat(2,1fr)}.dflags{grid-template-columns:repeat(5,1fr)}}
+
 </style>
 </head>
 <body>
 <main>
-<header><h1>SNES Build<small>ca65 + ld65 no navegador</small></h1>
+<header><h1><img class="logo" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAC30lEQVR4nO2ZwWsTQRTGP0MvBQlB6KkQ4jZ60FsP3qoXlepFyMWSS48rSCgUEfwLvJRACIWuNy9BQYoiiCR4aHorGPBgD3XThmBAKMgSCl6K9SCzzk5mZieb7bqQ9zvNTGY387335r2dXYAgCIIgCIIgCIIgCIKYLi6YTqxubJ2Zzl1/8sj4vv+b0IUy4Xfu3jS+aavZBgC87eQiLuv8aDdWApq1BqhubJ2NI1yk1WynxgiicMbIIB/qOvG2XfHbjlNXzmPRkNZtoTSASjwTnru27o95+1UAakO0mm28/J2dcKnhfHlaHtvIGb7DQj4s7Hnxsj5P1+3DsgpYzQyxmhmOuz5joogHuAgw2e+2XVGK7R98RvZ0RxoFXbfvtw8Pe6naDjNJ/MlCMR8wwv1XD4xLalx8WHknNXoGMM/2jlP39zuPzvsillXA7e/3QufFiUo8IOSAaSR0C7Csz3vX269iOHPL72dPd0KvWSjmAfzLBzqvJInSAH65W7sY6DNRsucANtbALwBAWWIIxvB1PtY8kH3Yj2RQbQQw8azt1U78vmq/M/GsXcZslHWNRVTxgMQAoud5vMVj2HZFKt62KwHxjNLAlV4zyaLjJJEyKGO4djmxUpitHZlXAcep/y13XLgDQG/3CLnOnDL0Hac+Eu5vBgNszxeNyuN5oRMPhESAVzuBt3gMAMh15gK/qQ5DZcyiNHABANvzxcgLSwqlAcTMLvY/Pvvmz11WzNF5/me5GNsWuNRw40uCIjIRvHjWX35+RXsN/ygcF5MIZ0z9k+DYp0HR+4z3n35gc29JGfYsAqbyNCiGf+/q9cRKYOHgq9bYgR+jRoHO+7znAaD0IrmSGCYeCHkl1nX7/iGGwTL84xu7/tjm3hKA0eSX1rDnUW6BVrMNyyqMGEF3GOIRPZ9WQl+LW1bB74vRICPNr79kGH8Y4Q0RBvN62sUD9GmMIAiCIAiCIAiCIAiCmDr+AACOTJn8irDuAAAAAElFTkSuQmCC"><span>PROTEUS SNES PROGRAMMING</span><small>ca65 + ld65 no navegador</small></h1>
 <div class="bar"><button class="btn mini" id="theme" type="button">Tema</button></div></header>
 
 <div class="bar">
@@ -158,7 +194,8 @@ footer{color:var(--mut);font-size:12px}
       <button class="mini" id="addf" type="button">+ Novo</button>
       <button class="mini" id="ren" type="button">Renomear</button>
       <button class="mini" id="dlf" type="button">Baixar</button>
-      <button class="mini danger" id="del" type="button">Apagar</button></div>
+      <button class="mini danger" id="del" type="button">Apagar</button>
+      <button class="mini tog" id="dbgbtn" type="button" aria-pressed="false" title="Roda a ROM passo a passo no simulador da CPU 65816">Debugger</button></div>
     <div class="find" id="findbar" hidden>
       <input id="fq" type="text" placeholder="Buscar" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Texto a buscar">
       <span id="fcount" aria-live="polite"></span>
@@ -289,7 +326,7 @@ TILE:
 `;
 let S={files:new Map(),cur:"main.asm",main:"main.asm",open:new Set(),selDir:"",selKind:"file",
  o:{main:"main.asm",cfg:"snes.cfg",out:"jogo.sfc",ca:"--cpu 65816",ld:"",ci:true,lbl:false,emu:"com.explusalpha.Snes9xPlus",emuPath:""}};
-let rom=null,outFiles={};
+let rom=null,outFiles={},dbgFile=null;
 function loadSample(){const chr=new Uint8Array(32);for(let i=0;i<32;i++)chr[i]=(i*7)&255;S.files=new Map([["main.asm",enc.encode(SAMPLE_MAIN)],["HEADER.asm",enc.encode(SAMPLE_HEADER)],["snes.cfg",enc.encode(SAMPLE_CFG)],["GRAFICOS/EXEMPLO.CHR",chr]]);S.cur="main.asm";S.main="main.asm";S.open=new Set(["GRAFICOS"]);}
 const isText=n=>/\.(asm|inc|s|cfg|txt|md|json|lbl|map|mac|i|h)$/i.test(n)||!/\.[^/.]+$/.test(n);
 /* ---------- persistência (IndexedDB, se existir) ---------- */
@@ -297,6 +334,165 @@ function idb(){return new Promise((ok,no)=>{try{const r=indexedDB.open("snesbuil
 async function save(){try{const db=await idb();const o={files:[...S.files],cur:S.cur,main:S.main,o:S.o,open:[...S.open],selDir:S.selDir,selKind:S.selKind};db.transaction("k","readwrite").objectStore("k").put(o,"proj")}catch(e){}}
 async function restore(){try{const db=await idb();return await new Promise(ok=>{const r=db.transaction("k").objectStore("k").get("proj");r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}catch(e){return null}}
 let saveT=0;const saveSoon=()=>{clearTimeout(saveT);saveT=setTimeout(save,400)};
+/* ---------- simulador da CPU 65816 (só a CPU: sem vídeo, som ou DMA) ---------- */
+const OPS=[];(`BRK imm1,ORA idx,COP imm1,ORA sr,TSB dp,ORA dp,ASL dp,ORA idl,PHP imp,ORA imm,ASL acc,PHD imp,TSB abs,ORA abs,ASL abs,ORA abl,
+BPL rel,ORA idy,ORA idp,ORA sry,TRB dp,ORA dpx,ASL dpx,ORA idly,CLC imp,ORA aby,INC acc,TCS imp,TRB abs,ORA abx,ASL abx,ORA alx,
+JSR abs,AND idx,JSL abl,AND sr,BIT dp,AND dp,ROL dp,AND idl,PLP imp,AND imm,ROL acc,PLD imp,BIT abs,AND abs,ROL abs,AND abl,
+BMI rel,AND idy,AND idp,AND sry,BIT dpx,AND dpx,ROL dpx,AND idly,SEC imp,AND aby,DEC acc,TSC imp,BIT abx,AND abx,ROL abx,AND alx,
+RTI imp,EOR idx,WDM imm1,EOR sr,MVP blk,EOR dp,LSR dp,EOR idl,PHA imp,EOR imm,LSR acc,PHK imp,JMP abs,EOR abs,LSR abs,EOR abl,
+BVC rel,EOR idy,EOR idp,EOR sry,MVN blk,EOR dpx,LSR dpx,EOR idly,CLI imp,EOR aby,PHY imp,TCD imp,JML abl,EOR abx,LSR abx,EOR alx,
+RTS imp,ADC idx,PER rell,ADC sr,STZ dp,ADC dp,ROR dp,ADC idl,PLA imp,ADC imm,ROR acc,RTL imp,JMP ind,ADC abs,ROR abs,ADC abl,
+BVS rel,ADC idy,ADC idp,ADC sry,STZ dpx,ADC dpx,ROR dpx,ADC idly,SEI imp,ADC aby,PLY imp,TDC imp,JMP iax,ADC abx,ROR abx,ADC alx,
+BRA rel,STA idx,BRL rell,STA sr,STY dp,STA dp,STX dp,STA idl,DEY imp,BIT imm,TXA imp,PHB imp,STY abs,STA abs,STX abs,STA abl,
+BCC rel,STA idy,STA idp,STA sry,STY dpx,STA dpx,STX dpy,STA idly,TYA imp,STA aby,TXS imp,TXY imp,STZ abs,STA abx,STZ abx,STA alx,
+LDY immx,LDA idx,LDX immx,LDA sr,LDY dp,LDA dp,LDX dp,LDA idl,TAY imp,LDA imm,TAX imp,PLB imp,LDY abs,LDA abs,LDX abs,LDA abl,
+BCS rel,LDA idy,LDA idp,LDA sry,LDY dpx,LDA dpx,LDX dpy,LDA idly,CLV imp,LDA aby,TSX imp,TYX imp,LDY abx,LDA abx,LDX aby,LDA alx,
+CPY immx,CMP idx,REP imm1,CMP sr,CPY dp,CMP dp,DEC dp,CMP idl,INY imp,CMP imm,DEX imp,WAI imp,CPY abs,CMP abs,DEC abs,CMP abl,
+BNE rel,CMP idy,CMP idp,CMP sry,PEI idp,CMP dpx,DEC dpx,CMP idly,CLD imp,CMP aby,PHX imp,STP imp,JML ial,CMP abx,DEC abx,CMP alx,
+CPX immx,SBC idx,SEP imm1,SBC sr,CPX dp,SBC dp,INC dp,SBC idl,INX imp,SBC imm,NOP imp,XBA imp,CPX abs,SBC abs,INC abs,SBC abl,
+BEQ rel,SBC idy,SBC idp,SBC sry,PEA abs,SBC dpx,INC dpx,SBC idly,SED imp,SBC aby,PLX imp,XCE imp,JSR iax,SBC abx,INC abx,SBC alx`).replace(/\n/g,"").split(",").forEach(s=>{const[a,b]=s.trim().split(" ");OPS.push([a,b])});
+const hx=(n,d)=>n.toString(16).toUpperCase().padStart(d,"0");
+function SnesCPU(rom,map){
+ let cur={w:[],l:0};const c={hist:[],rom,map:map||"lorom",wram:new Uint8Array(0x20000),io:new Uint8Array(0x6000),iolog:[],a:0,x:0,y:0,s:0x1FF,d:0,db:0,pb:0,pc:0,p:0x34,e:1,steps:0,cycles:0,halted:false,waiting:false,hv:0,stop:""};
+ const P={C:1,Z:2,I:4,D:8,X:0x10,M:0x20,V:0x40,N:0x80};
+ const m8=()=>c.e||(c.p&0x20),x8=()=>c.e||(c.p&0x10);
+ function romIdx(b,o){const n=rom.length;if(!n)return -1;if(c.map==="hirom")return ((b&0x3F)*0x10000+o)%n;return ((b&0x7F)*0x8000+(o&0x7FFF))%n}
+ function rd(a){a&=0xFFFFFF;const b=a>>16,o=a&0xFFFF;
+  if(b===0x7E||b===0x7F)return c.wram[((b&1)<<16)|o];
+  if(b<0x40||(b>=0x80&&b<0xC0)){
+   if(o<0x2000)return c.wram[o];
+   if(o<0x6000){if(o===0x4212){c.hv^=1;return c.hv?0x80:0}if(o===0x4210)return 0x82;return c.io[o-0x2000]}
+   if(o<0x8000)return c.map==="hirom"&&b>=0x20&&b<0x40?rom[romIdx(b,o)]|0:0;
+   return rom[romIdx(b,o)]|0}
+  if(c.map==="hirom")return rom[romIdx(b,o)]|0;
+  if(o>=0x8000||b>=0xC0)return rom[romIdx(b,o)]|0;return 0}
+ function wr(a,v){a&=0xFFFFFF;v&=0xFF;const b=a>>16,o=a&0xFFFF;
+  if(b===0x7E||b===0x7F){const i=((b&1)<<16)|o;cur.w.push(i,c.wram[i]);c.wram[i]=v;return}
+  if(b<0x40||(b>=0x80&&b<0xC0)){
+   if(o<0x2000){cur.w.push(o,c.wram[o]);c.wram[o]=v;return}
+   if(o<0x6000){cur.w.push(0x20000+o-0x2000,c.io[o-0x2000]);c.io[o-0x2000]=v;c.iolog.push([a,v,c.pcAt]);cur.l++;if(c.iolog.length>200){c.iolog.shift()}}}}
+ const rdw=(a,w)=>w===2?rd(a)|rd(a+1)<<8:rd(a);
+ const wrw=(a,v,w)=>{wr(a,v);if(w===2)wr(a+1,v>>8)};
+ const f8=()=>{const v=rd(c.pb<<16|c.pc);c.pc=(c.pc+1)&0xFFFF;return v};
+ const f16=()=>f8()|f8()<<8,f24=()=>f8()|f8()<<8|f8()<<16;
+ const sg8=v=>v&0x80?v-256:v,sg16=v=>v&0x8000?v-65536:v;
+ function setNZ(v,w){c.p=(c.p&~0x82)|(v&(w===2?0x8000:0x80)?0x80:0)|((w===2?v&0xFFFF:v&0xFF)===0?2:0)}
+ function push8(v){wr(c.s,v);c.s=c.e?(0x100|((c.s-1)&0xFF)):((c.s-1)&0xFFFF)}
+ function pull8(){c.s=c.e?(0x100|((c.s+1)&0xFF)):((c.s+1)&0xFFFF);return rd(c.s)}
+ const push16=v=>{push8(v>>8);push8(v)},pull16=()=>pull8()|pull8()<<8;
+ const dpa=o=>(c.d+o)&0xFFFF;
+ /* endereço efetivo */
+ function ea(mode){let o;switch(mode){
+  case"dp":return dpa(f8());case"dpx":return dpa(f8()+(c.x&(x8()?0xFF:0xFFFF)));case"dpy":return dpa(f8()+(c.y&(x8()?0xFF:0xFFFF)));
+  case"idp":o=dpa(f8());return c.db<<16|rdw(o,2);
+  case"idx":o=dpa(f8()+(c.x&(x8()?0xFF:0xFFFF)));return c.db<<16|rdw(o,2);
+  case"idy":o=dpa(f8());return ((c.db<<16|rdw(o,2))+(c.y&(x8()?0xFF:0xFFFF)))&0xFFFFFF;
+  case"idl":o=dpa(f8());return rdw(o,2)|rd(o+2)<<16;
+  case"idly":o=dpa(f8());return ((rdw(o,2)|rd(o+2)<<16)+(c.y&(x8()?0xFF:0xFFFF)))&0xFFFFFF;
+  case"abs":return c.db<<16|f16();
+  case"abx":return ((c.db<<16|f16())+(c.x&(x8()?0xFF:0xFFFF)))&0xFFFFFF;
+  case"aby":return ((c.db<<16|f16())+(c.y&(x8()?0xFF:0xFFFF)))&0xFFFFFF;
+  case"abl":return f24();case"alx":return (f24()+(c.x&(x8()?0xFF:0xFFFF)))&0xFFFFFF;
+  case"sr":return (c.s+f8())&0xFFFF;
+  case"sry":o=(c.s+f8())&0xFFFF;return ((c.db<<16|rdw(o,2))+(c.y&(x8()?0xFF:0xFFFF)))&0xFFFFFF}}
+ /* ULA */
+ function alu(op,v,w){const mask=w===2?0xFFFF:0xFF,sb=w===2?0x8000:0x80,A=c.a&mask;let r;
+  switch(op){
+  case"ORA":r=A|v;break;case"AND":r=A&v;break;case"EOR":r=A^v;break;
+  case"ADC":case"SBC":{const sub=op==="SBC";let cin=c.p&1,res;
+   if(c.p&8){const n=w===2?4:2;let carry=cin,out=0;
+    if(!sub){for(let i=0;i<n;i++){let d=((A>>4*i)&15)+((v>>4*i)&15)+carry;if(d>9)d+=6;carry=d>15?1:0;out|=(d&15)<<4*i}}
+    else{let borrow=1-cin;for(let i=0;i<n;i++){let d=((A>>4*i)&15)-((v>>4*i)&15)-borrow;if(d<0){d+=10;borrow=1}else borrow=0;out|=(d&15)<<4*i}carry=1-borrow}
+    const vv=sub?v^mask:v;const bin=A+vv+cin;c.p=(c.p&~0x41)|(carry?1:0)|((~(A^vv)&(A^bin)&sb)?0x40:0);res=out}
+   else{const vv=sub?(~v&mask):v;const bin=A+vv+cin;c.p=(c.p&~0x41)|(bin>mask?1:0)|((~(A^vv)&(A^bin)&sb)?0x40:0);res=bin&mask}
+   r=res;break}
+  case"CMP":case"CPX":case"CPY":{const R=op==="CMP"?A:(op==="CPX"?c.x&mask:c.y&mask);const d=R-v;c.p=(c.p&~0x83)|(R>=v?1:0)|((d&mask)===0?2:0)|(d&sb?0x80:0);return}
+  case"BIT":{c.p=(c.p&~0x42)|((A&v)===0?2:0)|(v&(sb>>1)?0x40:0)|(v&sb?0x80:0);return}}
+  c.a=w===2?r&0xFFFF:(c.a&0xFF00)|(r&0xFF);setNZ(r,w)}
+ function shift(op,v,w){const mask=w===2?0xFFFF:0xFF,sb=w===2?0x8000:0x80,cin=c.p&1;let r,co;
+  switch(op){case"ASL":co=v&sb;r=(v<<1)&mask;break;case"LSR":co=v&1;r=v>>1;break;
+   case"ROL":co=v&sb;r=((v<<1)|cin)&mask;break;case"ROR":co=v&1;r=(v>>1)|(cin?sb:0);break}
+  c.p=(c.p&~1)|(co?1:0);setNZ(r,w);return r}
+ function branch(cond){const o=sg8(f8());if(cond)c.pc=(c.pc+o)&0xFFFF}
+ function setP(v){c.p=v&0xFF;if(c.e)c.p|=0x30;if(c.p&0x10||c.e){c.x&=0xFF;c.y&=0xFF}}
+ function irq(vec,native){push8(c.pb);}
+ function interrupt(vecN,vecE){if(!c.e){push8(c.pb)}push16(c.pc);push8(c.p&(c.e?0xFF:0xFF));c.p=(c.p|4)&~8;c.pb=0;const v=c.e?vecE:vecN;c.pc=rd(v)|rd(v+1)<<8}
+ c.back=()=>{const h=c.hist.pop();if(!h)return false;for(let i=h.w.length-2;i>=0;i-=2){const a=h.w[i],v=h.w[i+1];if(a>=0x20000)c.io[a-0x20000]=v;else c.wram[a]=v}
+  if(h.l)c.iolog.length=Math.max(0,c.iolog.length-h.l);[c.a,c.x,c.y,c.s,c.d,c.db,c.pb,c.pc,c.p,c.e,c.steps,c.cycles,c.hv]=h.r;c.halted=false;c.stop="";return true};
+ c.reset=()=>{c.hist=[];cur={w:[],l:0};c.a=c.x=c.y=0;c.s=0x1FF;c.d=0;c.db=0;c.pb=0;c.p=0x34;c.e=1;c.steps=0;c.cycles=0;c.halted=false;c.waiting=false;c.stop="";c.wram.fill(0);c.io.fill(0);c.iolog=[];c.hv=0;c.pc=rd(0xFFFC)|rd(0xFFFD)<<8};
+ c.step=()=>{
+  if(c.halted)return false;
+  cur={w:[],l:0,r:[c.a,c.x,c.y,c.s,c.d,c.db,c.pb,c.pc,c.p,c.e,c.steps,c.cycles,c.hv]};c.hist.push(cur);if(c.hist.length>20000)c.hist.shift();
+  c.pcAt=c.pb<<16|c.pc;const op=f8(),[mn,mode]=OPS[op];c.steps++;c.cycles+=2;const MW=m8()?1:2,XW=x8()?1:2;
+  const isRead=/^(ORA|AND|EOR|ADC|SBC|CMP|CPX|CPY|BIT|LDA|LDX|LDY)$/.test(mn);
+  if(isRead){const w=/^(CPX|CPY|LDX|LDY)$/.test(mn)?XW:MW;let v;
+   if(mode==="imm"||mode==="immx")v=w===2?f16():f8();else v=rdw(ea(mode),w);
+   if(mn==="LDA"){c.a=w===2?v:(c.a&0xFF00)|v;setNZ(v,w)}else if(mn==="LDX"){c.x=v;setNZ(v,w)}else if(mn==="LDY"){c.y=v;setNZ(v,w)}else alu(mn,v,w);return true}
+  switch(mn){
+  case"STA":wrw(ea(mode),c.a,MW);break;case"STX":wrw(ea(mode),c.x,XW);break;case"STY":wrw(ea(mode),c.y,XW);break;case"STZ":wrw(ea(mode),0,MW);break;
+  case"ASL":case"LSR":case"ROL":case"ROR":
+   if(mode==="acc"){const r=shift(mn,MW===2?c.a:c.a&0xFF,MW);c.a=MW===2?r:(c.a&0xFF00)|r}else{const a=ea(mode),r=shift(mn,rdw(a,MW),MW);wrw(a,r,MW)}break;
+  case"INC":case"DEC":{const d=mn==="INC"?1:-1;if(mode==="acc"){const r=((MW===2?c.a:c.a&0xFF)+d)&(MW===2?0xFFFF:0xFF);c.a=MW===2?r:(c.a&0xFF00)|r;setNZ(r,MW)}else{const a=ea(mode),r=(rdw(a,MW)+d)&(MW===2?0xFFFF:0xFF);wrw(a,r,MW);setNZ(r,MW)}break}
+  case"INX":c.x=(c.x+1)&(XW===2?0xFFFF:0xFF);setNZ(c.x,XW);break;case"INY":c.y=(c.y+1)&(XW===2?0xFFFF:0xFF);setNZ(c.y,XW);break;
+  case"DEX":c.x=(c.x-1)&(XW===2?0xFFFF:0xFF);setNZ(c.x,XW);break;case"DEY":c.y=(c.y-1)&(XW===2?0xFFFF:0xFF);setNZ(c.y,XW);break;
+  case"TSB":case"TRB":{const a=ea(mode),v=rdw(a,MW),A=MW===2?c.a:c.a&0xFF;c.p=(c.p&~2)|((A&v)===0?2:0);wrw(a,mn==="TSB"?v|A:v&~A,MW);break}
+  case"BPL":branch(!(c.p&0x80));break;case"BMI":branch(c.p&0x80);break;case"BVC":branch(!(c.p&0x40));break;case"BVS":branch(c.p&0x40);break;
+  case"BCC":branch(!(c.p&1));break;case"BCS":branch(c.p&1);break;case"BNE":branch(!(c.p&2));break;case"BEQ":branch(c.p&2);break;case"BRA":branch(true);break;
+  case"BRL":{const o=sg16(f16());c.pc=(c.pc+o)&0xFFFF;break}
+  case"PER":{const o=sg16(f16());push16((c.pc+o)&0xFFFF);break}
+  case"JMP":if(mode==="abs")c.pc=f16();else if(mode==="ind"){const a=f16();c.pc=rd(a)|rd((a+1)&0xFFFF)<<8}else{const a=(f16()+c.x)&0xFFFF,b=c.pb<<16|a;c.pc=rd(b)|rd(b+1)<<8}break;
+  case"JML":if(mode==="abl"){const a=f24();c.pc=a&0xFFFF;c.pb=a>>16}else{const a=f16();c.pc=rd(a)|rd(a+1)<<8;c.pb=rd(a+2)}break;
+  case"JSR":if(mode==="abs"){const a=f16();push16((c.pc-1)&0xFFFF);c.pc=a}else{const lo=f8();push16((c.pc)&0xFFFF);const hi=rd(c.pb<<16|c.pc);const a=((lo|hi<<8)+c.x)&0xFFFF;const b=c.pb<<16|a;c.pc=rd(b)|rd(b+1)<<8}break;
+  case"JSL":{const a=f24();push8(c.pb);push16((c.pc-1)&0xFFFF);c.pc=a&0xFFFF;c.pb=a>>16;break}
+  case"RTS":c.pc=(pull16()+1)&0xFFFF;break;
+  case"RTL":{c.pc=(pull16()+1)&0xFFFF;c.pb=pull8();break}
+  case"RTI":{setP(pull8());c.pc=pull16();if(!c.e)c.pb=pull8();break}
+  case"BRK":case"COP":{f8();interrupt(mn==="BRK"?0xFFE6:0xFFE4,mn==="BRK"?0xFFFE:0xFFF4);break}
+  case"PHA":MW===2?push16(c.a):push8(c.a);break;case"PHX":XW===2?push16(c.x):push8(c.x);break;case"PHY":XW===2?push16(c.y):push8(c.y);break;
+  case"PLA":{const v=MW===2?pull16():pull8();c.a=MW===2?v:(c.a&0xFF00)|v;setNZ(v,MW);break}
+  case"PLX":{c.x=XW===2?pull16():pull8();setNZ(c.x,XW);break}case"PLY":{c.y=XW===2?pull16():pull8();setNZ(c.y,XW);break}
+  case"PHP":push8(c.p);break;case"PLP":setP(pull8());break;
+  case"PHB":push8(c.db);break;case"PLB":c.db=pull8();setNZ(c.db,1);break;case"PHD":push16(c.d);break;case"PLD":c.d=pull16();setNZ(c.d,2);break;case"PHK":push8(c.pb);break;
+  case"PEA":push16(f16());break;case"PEI":{const o=dpa(f8());push16(rdw(o,2));break}
+  case"CLC":c.p&=~1;break;case"SEC":c.p|=1;break;case"CLI":c.p&=~4;break;case"SEI":c.p|=4;break;case"CLD":c.p&=~8;break;case"SED":c.p|=8;break;case"CLV":c.p&=~0x40;break;
+  case"REP":{const v=f8();setP(c.p&~v);break}case"SEP":{setP(c.p|f8());break}
+  case"XCE":{const oc=c.p&1,oe=c.e;c.p=(c.p&~1)|oe;c.e=oc;if(c.e){c.p|=0x30;c.x&=0xFF;c.y&=0xFF;c.s=0x100|(c.s&0xFF)}break}
+  case"XBA":{c.a=((c.a&0xFF)<<8)|(c.a>>8&0xFF);setNZ(c.a&0xFF,1);break}
+  case"TAX":c.x=XW===2?c.a:c.a&0xFF;setNZ(c.x,XW);break;case"TAY":c.y=XW===2?c.a:c.a&0xFF;setNZ(c.y,XW);break;
+  case"TXA":{const v=MW===2?c.x:c.x&0xFF;c.a=MW===2?v:(c.a&0xFF00)|v;setNZ(v,MW);break}
+  case"TYA":{const v=MW===2?c.y:c.y&0xFF;c.a=MW===2?v:(c.a&0xFF00)|v;setNZ(v,MW);break}
+  case"TXY":c.y=c.x;setNZ(c.y,XW);break;case"TYX":c.x=c.y;setNZ(c.x,XW);break;
+  case"TCD":c.d=c.a;setNZ(c.d,2);break;case"TDC":c.a=c.d;setNZ(c.a,2);break;
+  case"TCS":c.s=c.e?0x100|(c.a&0xFF):c.a;break;case"TSC":c.a=c.s;setNZ(c.a,2);break;
+  case"TSX":c.x=XW===2?c.s:c.s&0xFF;setNZ(c.x,XW);break;case"TXS":c.s=c.e?0x100|(c.x&0xFF):c.x;break;
+  case"MVN":case"MVP":{const dst=f8(),src=f8();c.db=dst;const d=mn==="MVN"?1:-1;
+   wr(dst<<16|c.y,rd(src<<16|c.x));c.x=(c.x+d)&(XW===2?0xFFFF:0xFF);c.y=(c.y+d)&(XW===2?0xFFFF:0xFF);c.a=(c.a-1)&0xFFFF;
+   if(c.a!==0xFFFF)c.pc=(c.pc-3)&0xFFFF;break}
+  case"WDM":f8();break;case"NOP":break;
+  case"WAI":c.waiting=true;c.stop="WAI: esperando interrupção (o simulador não gera NMI)";c.halted=true;break;
+  case"STP":c.stop="STP: processador parado";c.halted=true;break;
+  default:c.stop="Instrução não suportada: "+mn;c.halted=true}
+  return true};
+ /* desmontar uma instrução em addr24 */
+ c.dis=addr=>{const b=addr>>16;let o=addr&0xFFFF;const g=()=>rd(b<<16|(o++&0xFFFF));const op=g(),[mn,mode]=OPS[op];let t=mn,len=1;
+  const h1=()=>{len+=1;return"$"+hx(g(),2)},h2=()=>{len+=2;const v=g()|g()<<8;return"$"+hx(v,4)},h3=()=>{len+=3;const v=g()|g()<<8|g()<<16;return"$"+hx(v,6)};
+  switch(mode){case"imp":break;case"acc":t+=" A";break;
+   case"imm":t+=" #"+(m8()?h1():h2());break;case"immx":t+=" #"+(x8()?h1():h2());break;case"imm1":t+=" #"+h1();break;
+   case"dp":t+=" "+h1();break;case"dpx":t+=" "+h1()+",X";break;case"dpy":t+=" "+h1()+",Y";break;
+   case"idp":t+=" ("+h1()+")";break;case"idx":t+=" ("+h1()+",X)";break;case"idy":t+=" ("+h1()+"),Y";break;
+   case"idl":t+=" ["+h1()+"]";break;case"idly":t+=" ["+h1()+"],Y";break;
+   case"abs":t+=" "+h2();break;case"abx":t+=" "+h2()+",X";break;case"aby":t+=" "+h2()+",Y";break;
+   case"abl":t+=" "+h3();break;case"alx":t+=" "+h3()+",X";break;
+   case"ind":t+=" ("+h2()+")";break;case"iax":t+=" ("+h2()+",X)";break;case"ial":t+=" ["+h2()+"]";break;
+   case"sr":t+=" "+h1()+",S";break;case"sry":t+=" ("+h1()+",S),Y";break;
+   case"rel":{len+=1;const v=sg8(g());t+=" $"+hx((o+v)&0xFFFF,4);break}
+   case"rell":{len+=2;const v=sg16(g()|g()<<8);t+=" $"+hx((o+v)&0xFFFF,4);break}
+   case"blk":{len+=2;const d=g(),s=g();t+=" $"+hx(s,2)+",$"+hx(d,2);break}}
+  return {text:t,len}};
+ c.rd=rd;c.m8=m8;c.x8=x8;c.PF=P;
+ return c}
+function detectMap(rom){const lo=rom[0x7FD5],hi=rom[0xFFD5];if(rom.length>0x10000&&((hi&0xEF)===0x21))return"hirom";if(((lo&0xEF)===0x20)||rom.length<=0x8000)return"lorom";if(rom.length>0x10000&&((hi&0xEF)===0x21))return"hirom";return"lorom"}
+if(typeof module!=="undefined")module.exports={SnesCPU,OPS,detectMap};
 /* ---------- editor nativo (celular): caixa de texto de verdade, com seleção por toque longo e alças ---------- */
 const IS_TA=false;
 class TADoc{constructor(t){this.text=t;this.a=0;this.h=0;this.sx=0;this.sy=0;this.eb=new Set();this.eg=new Set()}
@@ -431,7 +627,7 @@ function showCur(){
  else{host.hidden=true;shown=null;bin.hidden=false;bin.textContent=n+" é um arquivo de dados ("+fmtSize(d.length)+"). Fica disponível para .incbin e .include, mas não é editável aqui."}
  $("#setmain").hidden=S.selKind==="dir"||!/\.(asm|s)$/i.test(n)||n===S.main;
 }
-function openFile(p){flush();S.cur=p;S.selKind="file";showCur();renderTree();saveSoon()}
+function openFile(p){if(window.dbgOff)dbgOff();flush();S.cur=p;S.selKind="file";showCur();renderTree();saveSoon()}
 
 function renderTree(){
  const box=$("#tree");box.textContent="";
@@ -640,6 +836,107 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
  window.addEventListener("scroll",place,{passive:true});window.addEventListener("resize",place);
  let raf=0;(function loop(){if(mode!=="none")place();raf=requestAnimationFrame(loop)})();
 })();
+/* ---------- DEBUGGER: roda a ROM compilada passo a passo (CPU 65816) ---------- */
+(function(){
+ const pane=document.createElement("div");pane.id="dbgpane";pane.hidden=true;
+ pane.innerHTML=`<div class="dbar">
+  <button class="mini" id="d_reset" type="button">↺ Reiniciar</button>
+  <button class="mini" id="d_back" type="button">◀ Voltar</button>
+  <button class="mini pri" id="d_step" type="button">Avançar ▶</button>
+  <button class="mini" id="d_run" type="button">▶▶ Executar</button>
+  <span id="d_info"></span></div>
+  <div id="d_next"></div>
+  <div id="d_src" aria-label="Código em execução"></div>
+  <div class="dregs" id="d_regs"></div>
+  <div class="dflags" id="d_flags"></div>
+  <div class="dmem"><label>Memória em $<input id="d_addr" value="000000" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false"></label>
+   <button class="mini" id="d_wram" type="button">WRAM $7E0000</button><button class="mini" id="d_pc" type="button">No PC</button><button class="mini" id="d_sp" type="button">Pilha</button></div>
+  <pre id="d_mem"></pre>
+  <div class="dhead">Escritas em registradores ($2100-$5FFF)</div>
+  <pre id="d_io"></pre>
+  <div id="d_stop"></div>`;
+ $("#cmhost").after(pane);
+ const $d=id=>document.getElementById(id);
+ let cpu=null,dbgInfo=null,lineAt=new Map(),fileLines={},bps=new Set(),running=0,prev=null,prevMem=null,on=false,mapName="lorom",memBase=0;
+ const H=(n,d)=>hx(n,d);
+ /* lê o arquivo .dbg gerado pelo ld65 */
+ function parseDbg(txt){
+  const segs={},spans={},files={},lines=[];
+  const kv=s=>{const o={};s.replace(/(\w+)=("[^"]*"|[^,]*)/g,(m,k,v)=>{o[k]=v.replace(/^"|"$/g,"")});return o};
+  for(const ln of txt.split("\n")){const m=/^(\w+)\s+(.*)$/.exec(ln);if(!m)continue;const o=kv(m[2]);
+   if(m[1]==="seg")segs[o.id]={start:parseInt(o.start)};
+   else if(m[1]==="span")spans[o.id]={seg:o.seg,start:+o.start,size:+o.size};
+   else if(m[1]==="file")files[o.id]=o.name;
+   else if(m[1]==="line")lines.push(o)}
+  const map=new Map();
+  for(const l of lines){if(!l.span)continue;const f=files[l.file];if(!f)continue;
+   for(const sid of l.span.split("+")){const sp=spans[sid];if(!sp||!segs[sp.seg])continue;const a=(segs[sp.seg].start+sp.start)>>>0;if(!map.has(a))map.set(a,{file:f,line:+l.line})}}
+  return map}
+ const findFile=n=>{const k=[...S.files.keys()].find(x=>x.toLowerCase()===n.toLowerCase()||x.toLowerCase().endsWith("/"+n.toLowerCase()));return k||null};
+ function srcLines(f){const k=findFile(f);if(!k)return null;if(!fileLines[k])fileLines[k]=dec.decode(S.files.get(k)).split("\n");return {name:k,lines:fileLines[k]}}
+ const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+ const cur24=()=>cpu.pb<<16|cpu.pc;
+ function render(){
+  if(!cpu)return;
+  const pc=cur24(),loc=lineAt.get(pc),dis=cpu.dis(pc);
+  $d("d_info").textContent="passo "+cpu.steps+" · "+cpu.hist.length+" p/ voltar";
+  $d("d_next").innerHTML="<b>Próxima:</b> <code>"+H(cpu.pb,2)+":"+H(cpu.pc,4)+"</code> <span class=\"dis\">"+esc(dis.text)+"</span>"+(loc?" <small>("+esc(loc.file)+":"+loc.line+")</small>":"");
+  /* código-fonte */
+  const box=$d("d_src");let html="";
+  const sl=loc&&srcLines(loc.file);
+  if(sl){const L=sl.lines;for(let i=0;i<L.length;i++){const isCur=i+1===loc.line;html+='<div class="sl'+(isCur?" cur":"")+(bps.has(sl.name+":"+(i+1))?" bp":"")+'" data-l="'+(i+1)+'" data-f="'+esc(sl.name)+'"><span class="n">'+(i+1)+"</span><span class=\"t\">"+(esc(L[i])||"&#8203;")+"</span></div>"}
+   box.dataset.f=sl.name}
+  else{let a=pc;html='<div class="sl note"><span class="t">Sem informação de linha para este endereço. Mostrando a desmontagem:</span></div>';
+   for(let i=0;i<24;i++){const d=cpu.dis(a);html+='<div class="sl'+(i===0?" cur":"")+'"><span class="n">'+H(a&0xFFFF,4)+'</span><span class="t">'+esc(d.text)+"</span></div>";a=(a&0xFF0000)|((a+d.len)&0xFFFF)}}
+  box.innerHTML=html;const c=box.querySelector(".cur");if(c){const t=c.offsetTop-box.clientHeight/2+c.offsetHeight;box.scrollTop=Math.max(0,t)}
+  /* registradores */
+  const R=[["A",cpu.a,4],["X",cpu.x,cpu.x8()?2:4],["Y",cpu.y,cpu.x8()?2:4],["SP",cpu.s,4],["D",cpu.d,4],["DB",cpu.db,2],["PB",cpu.pb,2],["PC",cpu.pc,4]];
+  $d("d_regs").innerHTML=R.map(([n,v,w])=>'<div class="reg'+(prev&&prev.r[n]!==v?" chg":"")+'"><i>'+n+"</i><b>"+H(v,w)+"</b></div>").join("");
+  const F=[["N",0x80],["V",0x40],["M",0x20],["X",0x10],["D",8],["I",4],["Z",2],["C",1]];
+  const fv={};F.forEach(([n,b])=>fv[n]=cpu.p&b?1:0);fv.E=cpu.e;
+  $d("d_flags").innerHTML=["N","V","M","X","D","I","Z","C","E"].map(n=>'<div class="fl'+(prev&&prev.f[n]!==fv[n]?" chg":"")+'"><i>'+n+'</i><b>'+fv[n]+"</b></div>").join("");
+  prev={r:Object.fromEntries(R.map(([n,v])=>[n,v])),f:fv};
+  renderMem();
+  $d("d_io").textContent=cpu.iolog.slice(-8).reverse().map(x=>"$"+H(x[0]&0xFFFF,4)+" ← "+H(x[1],2)+"   (em "+H(x[2]>>16,2)+":"+H(x[2]&0xFFFF,4)+")").join("\n")||"(nenhuma escrita ainda)";
+  $d("d_stop").textContent=cpu.stop||"";$d("d_stop").hidden=!cpu.stop;
+  $d("d_back").disabled=!cpu.hist.length;$d("d_step").disabled=cpu.halted;
+ }
+ function renderMem(){
+  let base=memBase&0xFFFFFF&~15,s="",snap=[];
+  for(let r=0;r<8;r++){const a=base+r*16;s+="<b>"+H(a>>16,2)+":"+H(a&0xFFFF,4)+"</b> ";
+   for(let i=0;i<16;i++){const v=cpu.rd(a+i);snap.push(v);const ch=prevMem&&prevMem.base===base&&prevMem.v[r*16+i]!==v;s+=(ch?'<mark>'+H(v,2)+"</mark>":H(v,2))+" "}
+   let t="";for(let i=0;i<16;i++){const v=cpu.rd(a+i);t+=v>=32&&v<127?String.fromCharCode(v):"."}s+=" "+esc(t)+"\n"}
+  prevMem={base,v:snap};$d("d_mem").innerHTML=s}
+ function setMem(a){memBase=a&0xFFFFFF;$d("d_addr").value=H(memBase,6);prevMem=null;if(cpu)renderMem()}
+ $d("d_addr").addEventListener("change",()=>setMem(parseInt($d("d_addr").value,16)||0));
+ $d("d_wram").onclick=()=>setMem(0x7E0000);$d("d_pc").onclick=()=>cpu&&setMem(cur24());$d("d_sp").onclick=()=>cpu&&setMem(cpu.s);
+ function stop(){running=0;$d("d_run").textContent="▶▶ Executar";$d("d_run").classList.remove("pri")}
+ function step1(){if(cpu.halted)return false;cpu.step();return true}
+ $d("d_step").onclick=()=>{stop();step1();render()};
+ $d("d_back").onclick=()=>{stop();cpu.back();render()};
+ $d("d_reset").onclick=()=>{stop();cpu.reset();prev=null;prevMem=null;render()};
+ $d("d_run").onclick=()=>{if(running){stop();render();return}running=1;this_run()};
+ function this_run(){
+  $d("d_run").textContent="■ Parar";$d("d_run").classList.add("pri");
+  const loop=()=>{if(!running)return;let n=0;
+   while(n++<3000&&!cpu.halted){cpu.step();const l=lineAt.get(cur24());if(l&&bps.size&&bps.has((srcLines(l.file)||{}).name+":"+l.line)){stop();render();return}}
+   if(cpu.halted){stop();render();return}
+   $d("d_info").textContent="executando… passo "+cpu.steps;requestAnimationFrame(loop)};
+  requestAnimationFrame(loop)}
+ $d("d_src").addEventListener("click",e=>{const r=e.target.closest(".sl");if(!r||!r.dataset.l)return;if(!e.target.closest(".n"))return;const k=r.dataset.f+":"+r.dataset.l;if(bps.has(k))bps.delete(k);else bps.add(k);r.classList.toggle("bp")});
+ /* ligar/desligar */
+ async function dbgOn(){
+  const btn=$("#dbgbtn");btn.disabled=true;btn.textContent="Compilando…";
+  await build();btn.disabled=false;btn.textContent="Debugger";
+  if(!rom){log("O debugger precisa de uma ROM compilada sem erros.","e");return false}
+  fileLines={};lineAt=dbgFile?parseDbg(dec.decode(dbgFile)):new Map();
+  mapName=detectMap(rom);cpu=SnesCPU(rom,mapName);cpu.reset();prev=null;prevMem=null;
+  on=true;btn.setAttribute("aria-pressed","true");
+  $("#cmhost").hidden=true;$("#findbar").hidden=true;$("#bin").hidden=true;pane.hidden=false;
+  log("Debugger: ROM "+mapName.toUpperCase()+", início em "+H(cpu.pb,2)+":"+H(cpu.pc,4)+(lineAt.size?"":" (sem informação de linhas)"),"m");render();return true}
+ window.dbgOff=function(){if(!on)return;stop();on=false;$("#dbgbtn").setAttribute("aria-pressed","false");pane.hidden=true;showCur();try{cm.refresh()}catch(e){}};
+ $("#dbgbtn").onclick=()=>{on?dbgOff():dbgOn()};
+})();
 /* ---------- download ---------- */
 const BR=()=>window.SnesBridge||null;
 function b64(d){let s="";for(let i=0;i<d.length;i+=0x8000)s+=String.fromCharCode.apply(null,d.subarray(i,i+0x8000));return btoa(s)}
@@ -789,7 +1086,7 @@ const split=s=>{const tk=[];String(s).replace(/"([^"]*)"|(\S+)/g,(m,a,b)=>{tk.pu
  return out.filter(Boolean)};
 const tick=()=>new Promise(r=>setTimeout(r,30));
 async function build(){
- flush();await save();for(const k in errLines)delete errLines[k];applyAllErr();const b=$("#build");b.disabled=true;b.textContent="Compilando…";logEl.textContent="";rom=null;$("#dlrom").disabled=true;
+ flush();await save();for(const k in errLines)delete errLines[k];applyAllErr();const b=$("#build");b.disabled=true;b.textContent="Compilando…";logEl.textContent="";rom=null;dbgFile=null;$("#dlrom").disabled=true;
  const t0=performance.now();let errs=0,warns=0,okAll=false;
  try{
   await tick();const ca=await loadMod("ca65"),ld=await loadMod("ld65");
@@ -798,13 +1095,13 @@ async function build(){
   const out=(fd,t)=>{if(/Error/.test(t))errs++;else if(/Warning/.test(t))warns++;logLine(t)};
   for(const s of srcs){
    const o=s.replace(/\.[^./]+$/,"")+".o";log("ca65 "+s,"m");await tick();
-   const code=runTool(ca,[...split(S.o.ca),s,"-o",o],fs,out);if(code!==0){fail=true;break}objs.push(o)}
+   const code=runTool(ca,[...split(S.o.ca),"-g",s,"-o",o],fs,out);if(code!==0){fail=true;break}objs.push(o)}
   if(!fail){
-   const args=["-C",S.o.cfg,...objs,"-o",S.o.out,...split(S.o.ld)];if(S.o.lbl)args.push("-Ln","game.lbl","-m","game.map");
+   const args=["-C",S.o.cfg,...objs,"-o",S.o.out,"--dbgfile","game.dbg",...split(S.o.ld)];if(S.o.lbl)args.push("-Ln","game.lbl","-m","game.map");
    log("ld65 "+args.join(" "),"m");await tick();
    const code=runTool(ld,args,fs,out);fail=code!==0}
   const f=fs.find(S.o.out);
-  if(!fail&&f){rom=fs.m.get(f);okAll=true;outFiles={};for(const k of ["game.lbl","game.map"]){const kk=fs.find(k);if(kk)outFiles[k]=fs.m.get(kk)}}
+  if(!fail&&f){rom=fs.m.get(f);okAll=true;{const kd=fs.find("game.dbg");dbgFile=kd?fs.m.get(kd):null}outFiles={};for(const k of ["game.lbl","game.map"]){const kk=fs.find(k);if(kk)outFiles[k]=fs.m.get(kk)}}
  }catch(e){errs++;log("Erro: "+(e.message||JSON.stringify(e)),"e")}
  const dt=((performance.now()-t0)/1000).toFixed(1);const sum=$("#sum");
  if(okAll){const kb=(rom.length/1024).toFixed(0);log("Pronto: "+S.o.out+" ("+kb+" KB) em "+dt+" s.","o");sum.innerHTML="";const p=document.createElement("span");p.className="pill ok";p.textContent="compilou";const t=document.createElement("span");t.textContent=S.o.out+" · "+kb+" KB · "+dt+" s"+(warns?" · "+warns+" aviso(s)":"");sum.append(p,t);$("#dlrom").disabled=false;
