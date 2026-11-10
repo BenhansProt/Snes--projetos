@@ -502,9 +502,13 @@ function SnesCPU(rom,map){
  c.back=()=>{const h=c.hist.pop();if(!h)return false;for(let i=h.w.length-2;i>=0;i-=2){const a=h.w[i],v=h.w[i+1],sp=a>>>24,k=a&0xFFFFFF;if(sp===0){if(a>=0x20000)c.io[a-0x20000]=v;else c.wram[a]=v}else if(sp===1)ppu.vram[k]=v;else if(sp===2)ppu.cgram[k]=v;else if(sp===3)ppu.oam[k]=v;else if(sp===4)ppu.S[k]=v;else if(sp===5)ppu.pr[k]=v}
   if(h.l)c.iolog.length=Math.max(0,c.iolog.length-h.l);[c.a,c.x,c.y,c.s,c.d,c.db,c.pb,c.pc,c.p,c.e,c.steps,c.cycles,c.hv]=h.r;c.halted=false;c.stop="";return true};
  c.reset=()=>{c.hist=[];cur={w:[],l:0};c.a=c.x=c.y=0;c.s=0x1FF;c.d=0;c.db=0;c.pb=0;c.p=0x34;c.e=1;c.steps=0;c.cycles=0;c.halted=false;c.waiting=false;c.stop="";c.wram.fill(0);c.io.fill(0);ppu.vram.fill(0);ppu.cgram.fill(0);ppu.oam.fill(0);ppu.pr.fill(0);ppu.S.fill(0);c.iolog=[];c.hv=0;c.pc=rd(0xFFFC)|rd(0xFFFD)<<8};
+ c.frame=(budget)=>{c.rec=false;c.wai=0;let n=0;
+  while(n++<budget&&!c.halted){c.step();if(c.wai)break}
+  if(!c.wai&&!c.halted&&(c.io[0x2200]&0x80)){interrupt(0xFFEA,0xFFFA);c.nmis=(c.nmis||0)+1}
+  c.frames=(c.frames||0)+1;return n};
  c.step=()=>{
   if(c.halted)return false;
-  cur={w:[],l:0,r:[c.a,c.x,c.y,c.s,c.d,c.db,c.pb,c.pc,c.p,c.e,c.steps,c.cycles,c.hv]};c.hist.push(cur);if(c.hist.length>20000)c.hist.shift();
+  cur={w:[],l:0,r:[c.a,c.x,c.y,c.s,c.d,c.db,c.pb,c.pc,c.p,c.e,c.steps,c.cycles,c.hv]};if(c.rec!==false){c.hist.push(cur);if(c.hist.length>20000)c.hist.shift()}
   c.pcAt=c.pb<<16|c.pc;const op=f8(),[mn,mode]=OPS[op];c.steps++;c.cycles+=2;const MW=m8()?1:2,XW=x8()?1:2;
   const isRead=/^(ORA|AND|EOR|ADC|SBC|CMP|CPX|CPY|BIT|LDA|LDX|LDY)$/.test(mn);
   if(isRead){const w=/^(CPX|CPY|LDX|LDY)$/.test(mn)?XW:MW;let v;
@@ -551,7 +555,7 @@ function SnesCPU(rom,map){
    wr(dst<<16|c.y,rd(src<<16|c.x));c.x=(c.x+d)&(XW===2?0xFFFF:0xFF);c.y=(c.y+d)&(XW===2?0xFFFF:0xFF);c.a=(c.a-1)&0xFFFF;
    if(c.a!==0xFFFF)c.pc=(c.pc-3)&0xFFFF;break}
   case"WDM":f8();break;case"NOP":break;
-  case"WAI":if(c.io[0x2200]&0x80){interrupt(0xFFEA,0xFFFA);c.nmis=(c.nmis||0)+1}else{c.waiting=true;c.stop="WAI: o programa espera uma interrupção, mas o NMI está desligado (bit 7 de $4200 = 0). Ligue com  lda #$80 / sta $4200  para o simulador disparar o NMI no WAI.";c.halted=true}break;
+  case"WAI":c.wai=1;if(c.io[0x2200]&0x80){interrupt(0xFFEA,0xFFFA);c.nmis=(c.nmis||0)+1}else{c.waiting=true;c.stop="WAI: o programa espera uma interrupção, mas o NMI está desligado (bit 7 de $4200 = 0). Ligue com  lda #$80 / sta $4200  para o simulador disparar o NMI no WAI.";c.halted=true}break;
   case"STP":c.stop="STP: processador parado";c.halted=true;break;
   default:c.stop="Instrução não suportada: "+mn;c.halted=true}
   return true};
@@ -919,7 +923,7 @@ function goLine(f,l){flush();revealPath(f);S.cur=f;S.selKind="file";showCur();re
  let raf=0;(function loop(){if(mode!=="none")place();raf=requestAnimationFrame(loop)})();
 })();
 /* ---------- VISORES DA PPU (Sprites / Tilemap / Tiles / Registros) ---------- */
-window.PPUV=(function(){
+window.PPUV=(function(){let API;
  const H=(n,d)=>(n>>>0).toString(16).toUpperCase().padStart(d,"0");
  const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
  const pal=new Uint32Array(256);let gray=false;
@@ -978,13 +982,15 @@ window.PPUV=(function(){
   P.ctx.putImageData(P.img,0,0);const pc=box.querySelector("#sPv"),px=pc.getContext("2d");px.putImageData(P.img,0,0);
   const vis=q=>q.x+q.w>0&&q.x<256&&yy(q)+q.h>0&&yy(q)<224;
   for(const q of L){const on=q.i===s.sel;if(!(on||s.out&&vis(q)))continue;px.strokeStyle=on?"#ff0":"rgba(80,160,255,.8)";px.lineWidth=on?2:1;px.strokeRect(q.x+.5,yy(q)+.5,q.w-1,q.h-1)}
+  if(!API.fast){
   const S=canvas(512,1024);fill(S,0xFF202020);for(const q of L)drawSpr(S.buf,512,(q.i&7)*64+((64-q.w)>>1),(q.i>>3)*64+((64-q.h)>>1),q,ob,vr);
   const sc=box.querySelector("#sSh"),sx=sc.getContext("2d");sx.putImageData(S.img,0,0);sx.font="10px monospace";
   for(const q of L){const X=(q.i&7)*64,Y=(q.i>>3)*64;sx.strokeStyle=q.i===s.sel?"#ff0":"#444";sx.lineWidth=q.i===s.sel?2:1;sx.strokeRect(X+.5,Y+.5,63,63);sx.fillStyle=vis(q)?"#8f8":"#888";sx.fillText(q.i,X+3,Y+11)}
+  }
   const gap=(ob>>3&3);box.querySelector("#sObj").innerHTML="OBJSEL $"+H(ob,2)+" · tamanhos <b>"+q[0].join("×")+"</b> / <b>"+q[1].join("×")+"</b> · base tiles <b>$"+H((ob&7)<<13,4)+"</b> (palavra) · 2ª tabela +$"+H((gap+1)<<12,4);
   const d=L[Math.max(0,Math.min(127,s.sel))],ad=tbyte(ob,d.nt,d.t)>>1;
   box.querySelector("#sDet").innerHTML="<b>Sprite #"+d.i+"</b> · pos <b>X "+d.x+" Y "+d.y+"</b> · tamanho <b>"+d.w+"×"+d.h+"</b> ("+(d.big?"grande":"pequeno")+") · tile <b>$"+H(d.t,2)+"</b> · tabela "+d.nt+" · VRAM palavra <b>$"+H(ad,4)+"</b> · paleta <b>"+d.pal+"</b> (CGRAM "+(128+d.pal*16)+") · prioridade "+d.pri+" · flip "+(d.hf?"H":"-")+(d.vf?"V":"-");
-  box.querySelector("#sLst").textContent=L.map(q=>("00"+q.i).slice(-3)+" X"+String(q.x).padStart(4)+" Y"+String(q.y).padStart(4)+" T$"+H(q.t,2)+" P"+q.pal+" "+(q.w+"x"+q.h).padEnd(5)+" pr"+q.pri+" "+(q.hf?"H":"-")+(q.vf?"V":"-")+(vis(q)?"":"  (fora da tela)")).join("\n")}
+  if(!API.fast)box.querySelector("#sLst").textContent=L.map(q=>("00"+q.i).slice(-3)+" X"+String(q.x).padStart(4)+" Y"+String(q.y).padStart(4)+" T$"+H(q.t,2)+" P"+q.pal+" "+(q.w+"x"+q.h).padEnd(5)+" pr"+q.pri+" "+(q.hf?"H":"-")+(q.vf?"V":"-")+(vis(q)?"":"  (fora da tela)")).join("\n")}
 
  /* ===== TILEMAP ===== */
  const BPP=[[2,2,2,2],[4,4,2,0],[4,4,0,0],[8,4,0,0],[8,2,0,0],[4,2,0,0],[4,0,0,0],[8,0,0,0]];
@@ -1055,8 +1061,8 @@ window.PPUV=(function(){
    const ch=prevR&&prevR[a]!==raw;h+='<div class="rr'+(ch?" chg":"")+'"><span class="ra">$'+H(a,4)+'</span><span class="rn">'+n+'</span><b class="rv">'+H(raw,2)+'</b><span class="rd">'+(f(raw,c)||"")+"</span></div>"}
   prevR=cur;box.querySelector("#rTab").innerHTML=h||"<i>Nenhum registrador da PPU escrito ainda. Avance a execução.</i>"}
 
- return{render(v,box,c){({Til:tiles,Spr:sprites,Map:tilemap,Ppu:regs}[v])(box,c)},reset(){for(const k of ["Til","Spr","Map"])st[k].sel=k==="Spr"?0:k==="Til"?-1:null;prevR=null}}
-})();
+ API={fast:false,render(v,box,c){({Til:tiles,Spr:sprites,Map:tilemap,Ppu:regs}[v])(box,c)},reset(){for(const k of ["Til","Spr","Map"])st[k].sel=k==="Spr"?0:k==="Til"?-1:null;prevR=null}}
+return API})();
 /* ---------- DEBUGGER: roda a ROM compilada passo a passo (CPU 65816) ---------- */
 (function(){
  const pane=document.createElement("div");pane.id="dbgpane";pane.hidden=true;
@@ -1065,6 +1071,7 @@ window.PPUV=(function(){
   <button class="mini" id="d_back" type="button">◀ Voltar</button>
   <button class="mini pri" id="d_step" type="button">Avançar ▶</button>
   <button class="mini" id="d_run" type="button">▶▶ Executar</button>
+  <button class="mini" id="d_fps" type="button" title="Executa quadro a quadro a 60 por segundo, com NMI a cada quadro">🎞 60 fps</button>
   <span id="d_info"></span></div>
   <div id="d_next"></div>
   <div id="vwDbg">
@@ -1080,7 +1087,7 @@ window.PPUV=(function(){
   <div id="d_stop"></div>`;
  $("#cmhost").after(pane);
  const $d=id=>document.getElementById(id);
- let cpu=null,dbgInfo=null,lineAt=new Map(),fileLines={},bps=new Set(),running=0,prev=null,prevMem=null,on=false,mapName="lorom",memBase=0,view="Dbg",lastRef=0;
+ let cpu=null,dbgInfo=null,lineAt=new Map(),fileLines={},bps=new Set(),running=0,prev=null,prevMem=null,on=false,mapName="lorom",memBase=0,view="Dbg",lastRef=0,fpsOn=0,lastDur=0;
  const H=(n,d)=>hx(n,d);
  /* lê o arquivo .dbg gerado pelo ld65 */
  function parseDbg(txt){
@@ -1136,12 +1143,12 @@ window.PPUV=(function(){
  function setMem(a){memBase=a&0xFFFFFF;$d("d_addr").value=H(memBase,6);prevMem=null;if(cpu)renderMem()}
  $d("d_addr").addEventListener("change",()=>setMem(parseInt($d("d_addr").value,16)||0));
  $d("d_wram").onclick=()=>setMem(0x7E0000);$d("d_pc").onclick=()=>cpu&&setMem(cur24());$d("d_sp").onclick=()=>cpu&&setMem(cpu.s);
- function stop(){running=0;$d("d_run").textContent="▶▶ Executar";$d("d_run").classList.remove("pri")}
+ function stop(){running=0;fpsOn=0;$d("d_fps").textContent="🎞 60 fps";$d("d_fps").classList.remove("pri");$d("d_run").textContent="▶▶ Executar";$d("d_run").classList.remove("pri")}
  function step1(){if(cpu.halted)return false;cpu.step();return true}
- $d("d_step").onclick=()=>{stop();step1();render()};
- $d("d_back").onclick=()=>{stop();cpu.back();render()};
- $d("d_reset").onclick=()=>{stop();cpu.reset();prev=null;prevMem=null;render()};
- $d("d_run").onclick=()=>{if(running){stop();render();return}running=1;this_run()};
+ $d("d_step").onclick=()=>{stop();cpu.rec=true;step1();render()};
+ $d("d_back").onclick=()=>{stop();cpu.rec=true;cpu.back();render()};
+ $d("d_reset").onclick=()=>{stop();cpu.rec=true;cpu.reset();prev=null;prevMem=null;render()};
+ $d("d_run").onclick=()=>{cpu.rec=true;if(running){stop();render();return}running=1;this_run()};
  function this_run(){
   $d("d_run").textContent="■ Parar";$d("d_run").classList.add("pri");
   const loop=()=>{if(!running)return;let n=0;
@@ -1151,6 +1158,20 @@ window.PPUV=(function(){
    if(view!=="Dbg"&&performance.now()-lastRef>300){lastRef=performance.now();try{PPUV.render(view,$d("vw"+view),cpu)}catch(e){}}
    requestAnimationFrame(loop)};
   requestAnimationFrame(loop)}
+ $d("d_fps").onclick=()=>{
+  if(fpsOn){stop();render();return}
+  stop();cpu.hist=[];fpsOn=1;cpu.rec=false;cpu.frames=0;$d("d_fps").textContent="■ Parar";$d("d_fps").classList.add("pri");
+  let last=performance.now(),acc=0;PPUV.fast=true;
+  const loop=now=>{if(!fpsOn){PPUV.fast=false;cpu.rec=true;return}
+   acc+=Math.min(now-last,50);last=now;let n=0;
+   while(acc>=16.667&&n<2&&!cpu.halted){acc-=16.667;cpu.frame(10000);n++}
+   if(acc>50)acc=0;
+   if(cpu.halted){PPUV.fast=false;cpu.rec=true;stop();render();return}
+   if(now-lastRef>Math.max(16,lastDur*3)){const t0=performance.now();lastRef=now;
+    if(view==="Dbg"){if(!(cpu.frames%6))render()}else{try{PPUV.render(view,$d("vw"+view),cpu)}catch(e){}}
+    $d("d_info").textContent="quadro "+cpu.frames+" · NMIs "+(cpu.nmis||0);lastDur=performance.now()-t0}
+   requestAnimationFrame(loop)};
+  requestAnimationFrame(loop)};
  $d("d_src").addEventListener("click",e=>{const r=e.target.closest(".sl");if(!r||!r.dataset.l)return;if(!e.target.closest(".n"))return;const k=r.dataset.f+":"+r.dataset.l;if(bps.has(k))bps.delete(k);else bps.add(k);r.classList.toggle("bp")});
  /* ligar/desligar + abas de visão */
  const BTN={Dbg:"#dbgbtn",Spr:"#vSpr",Map:"#vMap",Til:"#vTil",Ppu:"#vPpu"};
