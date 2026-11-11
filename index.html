@@ -184,6 +184,10 @@ header h1 small{font-weight:400}
 .pvopt{display:block;width:100%;text-align:left;background:transparent;color:#fff;border:0;border-radius:6px;padding:10px 12px;font-size:14px}
 .pvopt.on{background:#7b46b8;font-weight:700}.pvopt:active{background:#8a5cc4}
 
+.dhint{font-size:11px;opacity:.75;margin:2px 0 4px}
+#d_src .sl{cursor:pointer}
+#d_src .sl.bp{background:rgba(220,50,50,.28)}
+
 </style>
 </head>
 <body>
@@ -1107,6 +1111,7 @@ return API})();
   <span id="d_info"></span></div>
   <div id="d_next"></div>
   <div id="vwDbg">
+  <div class="dhint">Toque numa linha para marcar uma parada (fica vermelha). O ▶▶ Executar para nela.</div>
   <div id="d_src" aria-label="Código em execução"></div>
   <div class="dregs" id="d_regs"></div>
   <div class="dflags" id="d_flags"></div>
@@ -1204,7 +1209,7 @@ return API})();
     $d("d_info").textContent="quadro "+cpu.frames+" · NMIs "+(cpu.nmis||0);lastDur=performance.now()-t0}
    requestAnimationFrame(loop)};
   requestAnimationFrame(loop)};
- $d("d_src").addEventListener("click",e=>{const r=e.target.closest(".sl");if(!r||!r.dataset.l)return;if(!e.target.closest(".n"))return;const k=r.dataset.f+":"+r.dataset.l;if(bps.has(k))bps.delete(k);else bps.add(k);r.classList.toggle("bp")});
+ $d("d_src").addEventListener("click",e=>{const r=e.target.closest(".sl");if(!r||!r.dataset.l)return;const k=r.dataset.f+":"+r.dataset.l;if(bps.has(k))bps.delete(k);else bps.add(k);r.classList.toggle("bp")});
  /* ligar/desligar + abas de visão */
  const BTN={Dbg:"#dbgbtn",Spr:"#vSpr",Map:"#vMap",Til:"#vTil",Oa1:"#vOa1",Oa2:"#vOa2",Ppu:"#vPpu"};
  function setView(v){view=v;
