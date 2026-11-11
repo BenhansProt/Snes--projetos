@@ -44,6 +44,19 @@ public class MainActivity extends Activity {
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);
         setContentView(web);
+        // Android 15+ desenha sob as barras do sistema: dá folga para status/navegação/teclado
+        web.setOnApplyWindowInsetsListener((v, ins) -> {
+            if (Build.VERSION.SDK_INT >= 30) {
+                android.graphics.Insets b = ins.getInsets(android.view.WindowInsets.Type.systemBars()
+                        | android.view.WindowInsets.Type.displayCutout()
+                        | android.view.WindowInsets.Type.ime());
+                v.setPadding(b.left, b.top, b.right, b.bottom);
+            } else {
+                v.setPadding(ins.getSystemWindowInsetLeft(), ins.getSystemWindowInsetTop(),
+                        ins.getSystemWindowInsetRight(), ins.getSystemWindowInsetBottom());
+            }
+            return Build.VERSION.SDK_INT >= 30 ? android.view.WindowInsets.CONSUMED : ins.consumeSystemWindowInsets();
+        });
         web.requestFocus();
         web.setFocusable(true);
         web.setFocusableInTouchMode(true);

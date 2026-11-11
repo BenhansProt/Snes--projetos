@@ -254,6 +254,7 @@ header h1 small{font-weight:400}
   <button class="btn" id="openemu" type="button" hidden>Abrir emulador</button>
   <button class="btn" id="imp" type="button">Importar arquivos / .zip</button>
   <button class="btn" id="lessonbtn" type="button" title="Lições e exemplos de código">📚 Exemplos (lições)</button>
+  <button class="btn" id="aboutbtn" type="button" title="Sobre, licenças e privacidade">ℹ Sobre</button>
   <button class="btn" id="impdir" type="button" title="Importa uma pasta inteira (gráficos, sons…), mantendo as subpastas">Importar pasta</button>
   <button class="btn danger" id="closeproj" type="button" title="Apaga tudo que está carregado no projeto (arquivos e pastas)">Fechar projeto</button>
   <button class="btn" id="expz" type="button">Baixar projeto (.zip)</button>
@@ -1338,6 +1339,19 @@ window.LESSONS=[{"id": 1, "titulo": "Cor de fundo", "resumo": "A primeira coisa 
   const c=document.createElement("button");c.type="button";c.className="pvopt";c.textContent="Fechar";c.onclick=()=>m.remove();bx.appendChild(c);
   m.appendChild(bx);m.onclick=e=>{if(e.target===m)m.remove()};document.body.appendChild(m)}
  $("#lessonbtn").onclick=picker;
+})();
+
+/* ---------- SOBRE / LICENÇAS ---------- */
+(function(){
+ const b=document.getElementById("aboutbtn");if(!b)return;
+ b.onclick=()=>{
+  const m=document.createElement("div");m.className="pvmodal";const bx=document.createElement("div");bx.className="pvbox";
+  bx.innerHTML='<div class="lph">Proteus SNES Programming</div><div class="lps">Versão 1.1<br>Ambiente para aprender e programar em assembly 65816 (Super Nintendo) direto no celular: editor, compilador, depurador e lições. Tudo roda no seu aparelho; nenhum dado é enviado a servidores nem coletado.</div>'+
+  '<div class="lps"><b>Aviso:</b> este app é independente e <b>não tem afiliação, patrocínio ou aprovação da Nintendo</b>. "Super Nintendo", "SNES" e "Super Famicom" são marcas da Nintendo Co., Ltd., citadas apenas para indicar o hardware de destino.</div>'+
+  '<div class="lps"><b>Licenças de terceiros</b><br>• cc65 (ca65 / ld65) — Ullrich von Bassewitz e colaboradores — licença zlib. Compilado para WebAssembly.<br>• O app não inclui jogos, ROMs nem material da Nintendo; todos os gráficos e códigos de exemplo são originais.</div>'+
+  '<div class="lps"><a href="https://benhansprot.github.io/Snes--projetos/privacidade.html" target="_blank" rel="noopener" style="color:#fff">Política de privacidade</a></div>';
+  const c=document.createElement("button");c.type="button";c.className="pvopt";c.textContent="Fechar";c.onclick=()=>m.remove();bx.appendChild(c);
+  m.appendChild(bx);m.onclick=e=>{if(e.target===m)m.remove()};document.body.appendChild(m)};
 })();
 /* ---------- download ---------- */
 const BR=()=>window.SnesBridge||null;

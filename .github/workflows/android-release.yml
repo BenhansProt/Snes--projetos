@@ -1,0 +1,41 @@
+name: Gerar AAB para a Play Store
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Organizar pastas
+        run: |
+          mkdir -p app/src/main/java/br/snesbuild app/src/main/assets app/src/main/res/xml
+          mv app_build.gradle app/build.gradle
+          mv AndroidManifest.xml app/src/main/AndroidManifest.xml
+          mv MainActivity.java app/src/main/java/br/snesbuild/MainActivity.java
+          mv file_paths.xml app/src/main/res/xml/file_paths.xml
+          mv index.html app/src/main/assets/index.html
+          for d in mdpi hdpi xhdpi xxhdpi xxxhdpi; do mkdir -p app/src/main/res/mipmap-$d; mv ic_$d.png app/src/main/res/mipmap-$d/ic_launcher.png; done
+      - name: Restaurar a chave de assinatura
+        run: echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Aceitar licenças do Android SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+      - name: Compilar o AAB assinado
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/upload.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Proteus-SNES-aab
+          path: app/build/outputs/bundle/release/app-release.aab
